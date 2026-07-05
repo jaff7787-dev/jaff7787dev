@@ -608,7 +608,7 @@ h1 .grad{background:linear-gradient(90deg,var(--purple),var(--pink),var(--orange
   <div class="sheet-word" id="sheet-word"></div>
   <div class="sheet-meaning" id="sheet-meaning"></div>
   <div class="sheet-row"><button class="sheet-tts" id="sheet-tts">🔊 발음·뜻 다시 듣기</button></div>
-  <div class="sheet-note">🌰 복습 노트에 담았어요 · 이번 판 <b>마지막에 다시 나와요!</b></div>
+  <div class="sheet-note" id="sheet-note">🌰 복습 노트에 담았어요 · 이번 판 <b>마지막에 다시 나와요!</b></div>
   <button class="sheet-btn" id="sheet-continue">알겠어요, 계속하기 →</button>
 </div>
 
@@ -1433,11 +1433,13 @@ function answer(i, btn){
     sfx.wrong(); haptic.wrong();
     if (!q.re) S.wrongQs.push(q);
     srsWrong(key);
-    // 듀오링고식 재출제: 이번 세션 맨 뒤에 다시 추가 (맞힐 때까지)
-    const again = Object.assign({}, q, { re:true });
-    again.choices = shuffle(q.choices.slice());
-    again.ci = again.choices.indexOf(q.m);
-    S.questions.push(again);
+    // 재출제는 문제당 1회만: 재출제에서 또 틀리면 이번 판엔 그만 (복습 노트가 이어받음)
+    if (!q.re){
+      const again = Object.assign({}, q, { re:true });
+      again.choices = shuffle(q.choices.slice());
+      again.ci = again.choices.indexOf(q.m);
+      S.questions.push(again);
+    }
     saveSession(S.idx + 1);
     // 자동 전환 없음: 정답 시트를 띄우고, 효과음 뒤 한글 뜻을 읽어줌
     const sess = S;
@@ -1451,6 +1453,9 @@ function openSheet(q){
   sheetQ = q;
   $('sheet-word').textContent = q.w;
   $('sheet-meaning').textContent = q.m;
+  $('sheet-note').innerHTML = q.re
+    ? '🌰 오늘은 여기까지! 이 단어는 <b>복습 노트</b>에서 다시 만나요'
+    : '🌰 복습 노트에 담았어요 · 이번 판 <b>마지막에 다시 나와요!</b>';
   $('sheet-backdrop').classList.add('show');
   $('answer-sheet').classList.add('show');
   try{ $('sheet-continue').focus({ preventScroll:true }); }catch(e){}
