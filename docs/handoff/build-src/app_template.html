@@ -1480,6 +1480,13 @@ function renderQuestion(){
   const q = S.questions[S.idx];
   S.locked = false;
   closeSheet();
+  // 안전장치: 정답 인덱스가 깨진 문제 복구 (구버전 이어하기 데이터 포함)
+  if (q.ci == null || q.ci < 0 || q.choices[q.ci] !== (q.s || q.m)){
+    const ans = q.s || q.m;
+    let idx = q.choices.indexOf(ans);
+    if (idx < 0){ q.choices[Math.floor(Math.random() * q.choices.length)] = ans; idx = q.choices.indexOf(ans); }
+    q.ci = idx;
+  }
   $('wc-tag').textContent = q.re ? '🌀 다시 만난 단어!' : '이 단어의 뜻은?';
   // ----- 전폭 진행바: 깃발/병아리/웨이브 표기 -----
   const base = S.base, inRe = S.idx >= base, spurt = inSpurt();
@@ -1607,7 +1614,7 @@ function answer(i, btn){
     if (!q.re){
       const again = Object.assign({}, q, { re:true });
       again.choices = shuffle(q.choices.slice());
-      again.ci = again.choices.indexOf(q.m);
+      again.ci = again.choices.indexOf(q.s || q.m); // 선택지는 핵심 뜻 기준
       S.questions.push(again);
     }
     // 러너: 발이 꼬여 넘어짐 💫
