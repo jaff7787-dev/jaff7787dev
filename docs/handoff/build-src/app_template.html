@@ -830,7 +830,11 @@ function unlockAudio(){
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
     if (!actx) actx = new AC();
-    if (actx.state === 'suspended') actx.resume().catch(()=>{});
+    if (actx.state === 'suspended'){
+      actx.resume().then(()=>{
+        if (!bgm.started){ bgm.started = true; bgm.refresh(); }
+      }).catch(()=>{});
+    }
     if (!audioUnlocked && actx.state !== 'closed'){
       // iOS 언락용 무음 버퍼 재생 (제스처 안에서 한 번 실행돼야 이후 소리가 남)
       const b = actx.createBuffer(1, 1, 22050);
@@ -947,7 +951,21 @@ const bgm = {
   start(mode){
     this.mode = mode;
     this.stop();
-    if (!bgmOn || muted || !actx || actx.state !== 'running' || !this.ensure()) return;
+    if (!bgmOn || muted || !actx) return;
+    if (actx.state !== 'running'){
+      // 컨텍스트가 아직 깨어나는 중이면, 깨어난 직후 이어서 시작 (GAME START 첫 탭 대응)
+      const m = mode;
+      try{
+        actx.resume().then(()=>{
+          if (this.mode === m && bgmOn && !muted && !this.timer) this._go();
+        }).catch(()=>{});
+      }catch(e){}
+      return;
+    }
+    this._go();
+  },
+  _go(){
+    if (!this.ensure()) return;
     this.step = 0;
     this.next = actx.currentTime + .06;
     this.timer = setInterval(()=>this.tick(), 140);
