@@ -224,7 +224,41 @@ h1 .grad{background:linear-gradient(90deg,var(--purple),var(--pink),var(--orange
 .progress-info{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;}
 .progress-info .pi-right{color:var(--purple);}
 .pbar{height:16px;background:#fff;border:3px solid var(--line);border-radius:999px;overflow:hidden;}
-.pbar .fill{height:100%;width:0%;background:linear-gradient(90deg,var(--green),var(--yellow));border-radius:999px;transition:width .4s cubic-bezier(.2,1.2,.4,1);}
+.pbar .fill{height:100%;width:0%;background:linear-gradient(90deg,var(--green),var(--yellow));border-radius:999px;transition:width .45s cubic-bezier(.2,1.2,.4,1);}
+/* 전폭 진행바 + 체크포인트 깃발 + 병아리 마커 */
+.pbar-row{margin:10px 0 2px;}
+.pbar.big{height:24px;position:relative;overflow:visible;}
+.pbar.big .fill{border-radius:999px;}
+.pbar.big.spurt .fill{background:linear-gradient(90deg,#FF9A3C,#FF5D5D);}
+.pflag{position:absolute;top:-10px;transform:translateX(-50%);font-size:18px;opacity:.32;filter:grayscale(.9);z-index:1;}
+.pflag.passed{opacity:1;filter:none;animation:flag-pop .45s cubic-bezier(.2,1.9,.4,1);}
+@keyframes flag-pop{from{transform:translateX(-50%) scale(.3) rotate(-30deg)}to{transform:translateX(-50%) scale(1) rotate(0)}}
+#p-chick{
+  position:absolute;top:-17px;left:0;transform:translateX(-50%);font-size:21px;z-index:2;
+  transition:left .45s cubic-bezier(.2,1,.4,1);filter:drop-shadow(1px 2px 0 #2B214333);
+}
+/* 라스트 스퍼트 화면 테두리 불꽃 글로우 */
+#spurt-frame{position:fixed;inset:0;pointer-events:none;z-index:54;display:none;}
+#spurt-frame.on{display:block;animation:spurt-glow 1s ease-in-out infinite;}
+@keyframes spurt-glow{0%,100%{box-shadow:inset 0 0 32px 3px #FF6A2E44}50%{box-shadow:inset 0 0 62px 12px #FF6A2E7A}}
+/* 체크포인트 오버레이 */
+.checkpoint{
+  position:fixed;inset:0;z-index:63;display:flex;align-items:center;justify-content:center;
+  background:#2B214380;opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.checkpoint.show{opacity:1;}
+.cp-card{
+  background:linear-gradient(170deg,#FFFDF4,#FFF3D6);border:4px solid var(--line);border-radius:28px;
+  box-shadow:7px 7px 0 var(--line);padding:26px 38px;text-align:center;
+}
+.checkpoint.show .cp-card{animation:cb-punch .55s cubic-bezier(.2,1.9,.4,1);}
+.cp-flag{font-size:58px;line-height:1;}
+.cp-title{font-size:30px;margin-top:8px;}
+.cp-sub{font-size:16px;font-weight:400;color:#6B6288;margin-top:6px;}
+.cp-wave{
+  display:inline-block;margin-top:12px;font-size:15px;border:3px solid var(--line);border-radius:999px;
+  padding:6px 16px;background:#fff;
+}
 
 .hud{display:flex;align-items:center;justify-content:space-between;margin:10px 0 4px;min-height:44px;}
 .score-chip{background:var(--card);border:3px solid var(--line);border-radius:999px;box-shadow:var(--hard);padding:7px 16px;font-size:17px;display:flex;gap:6px;align-items:center;}
@@ -503,7 +537,7 @@ h1 .grad{background:linear-gradient(90deg,var(--purple),var(--pink),var(--orange
       <span class="rc-play">▶️</span>
       <span class="rc-info">
         <span class="rc-title" id="resume-title"></span>
-        <span class="rc-sub">탭하면 이어서 계속! · ✕를 누르면 기록 삭제</span>
+        <span class="rc-sub" id="resume-sub">탭하면 이어서 계속! · ✕를 누르면 기록 삭제</span>
       </span>
       <span class="rc-x" id="btn-resume-x" role="button" aria-label="이어하기 삭제">✕</span>
     </div>
@@ -524,12 +558,16 @@ h1 .grad{background:linear-gradient(90deg,var(--purple),var(--pink),var(--orange
   <section class="screen" id="screen-quiz">
     <div class="quiz-top">
       <button class="icon-btn" id="btn-quit" aria-label="홈으로">🏠</button>
-      <div class="progress-wrap">
-        <div class="progress-info"><span id="p-count">1 / 50</span><span class="pi-right" id="p-day">DAY 1</span></div>
-        <div class="pbar"><div class="fill" id="p-fill"></div></div>
-      </div>
+      <div class="progress-info" style="flex:1;margin-bottom:0"><span id="p-count">1 / 50</span><span class="pi-right" id="p-day">DAY 1</span></div>
       <button class="icon-btn" id="btn-bgm" aria-label="배경음악 켜기/끄기">🎵</button>
       <button class="icon-btn" id="btn-sound" aria-label="소리 켜기/끄기">🔊</button>
+    </div>
+    <div class="pbar-row">
+      <div class="pbar big" id="pbar">
+        <div class="fill" id="p-fill"></div>
+        <div id="p-flags"></div>
+        <span id="p-chick">🐥</span>
+      </div>
     </div>
     <div class="hud">
       <div class="score-chip">💎 <span id="score">0</span></div>
@@ -613,6 +651,15 @@ h1 .grad{background:linear-gradient(90deg,var(--purple),var(--pink),var(--orange
   <button class="sheet-btn" id="sheet-continue">알겠어요, 계속하기 →</button>
 </div>
 
+<div id="spurt-frame"></div>
+<div class="checkpoint" id="checkpoint">
+  <div class="cp-card">
+    <div class="cp-flag">🚩</div>
+    <div class="cp-title">체크포인트!</div>
+    <div class="cp-sub" id="cp-sub">20 / 50 돌파</div>
+    <div class="cp-wave" id="cp-wave">이번 구간 9/10 정답</div>
+  </div>
+</div>
 <div id="fx-flash"></div>
 <canvas id="fx-canvas"></canvas>
 
@@ -684,7 +731,7 @@ function saveSession(nextIdx){
     type:S.type, day:S.day, label:S.label, questions:S.questions,
     idx:(nextIdx !== undefined ? nextIdx : S.idx),
     score:S.score, combo:S.combo, maxCombo:S.maxCombo, correct:S.correct,
-    wrongQs:S.wrongQs, sched:S.sched,
+    wrongQs:S.wrongQs, sched:S.sched, base:S.base, waveCorrect:S.waveCorrect,
   };
   try{ localStorage.setItem(LS_SESS, JSON.stringify(snap)); }catch(e){}
 }
@@ -702,6 +749,8 @@ function resumeSession(){
   const s = loadSession();
   if (!s) return false;
   S = Object.assign(s, { locked:false });
+  if (!S.base) S.base = S.questions.filter(q=>!q.re).length;
+  if (S.waveCorrect == null) S.waveCorrect = 0;
   $('p-day').textContent = S.label;
   $('score').textContent = S.score;
   const cc = $('combo-chip');
@@ -896,6 +945,12 @@ const sfx = {
   tap(){ beep(520,.06,'sine',0,.1); },
   fanfare(){ [523,659,784,1046].forEach((f,i)=>beep(f,.22,'triangle',i*.12,.24)); },
   levelup(){ beep(659,.1,'triangle',0,.22); beep(880,.1,'triangle',.09,.24); beep(1319,.26,'triangle',.18,.26); },
+  checkpoint(){ // 🚩 체크포인트 통과: 맑은 종소리 상승 + 반짝임
+    beep(659,.14,'triangle',0,.22); beep(1319,.14,'sine',0,.1);
+    beep(784,.14,'triangle',.11,.22); beep(1568,.14,'sine',.11,.1);
+    beep(1046,.42,'triangle',.22,.24); beep(2093,.42,'sine',.22,.1);
+    beep(3136,.2,'sine',.4,.07);
+  },
   rankStamp(rank){ // 랭크 도장: 쿵! + 랭크별 여운
     beep(150,.16,'square',0,.26); beep(75,.3,'sine',.02,.3);
     if (rank === 'S'){ [1046,1319,1568,2093].forEach((f,i)=>beep(f,.18,'triangle',.2+i*.09,.24)); beep(3136,.3,'sine',.55,.1); }
@@ -1243,7 +1298,12 @@ function renderHome(){
   const rc = $('btn-resume');
   rc.classList.toggle('show', !!paused);
   if (paused){
+    const pBase = paused.base || paused.questions.filter(q=>!q.re).length;
     $('resume-title').textContent = '▷ ' + paused.label + ' 이어하기 · ' + (paused.idx+1) + '/' + paused.questions.length + ' · 💎 ' + paused.score;
+    // 이미 쌓아온 진행이 아깝게 보이도록 (endowed progress)
+    $('resume-sub').textContent = paused.idx >= 10
+      ? '🚩 웨이브 ' + (Math.floor(Math.min(paused.idx, pBase - 1) / 10) + 1) + '까지 도착! 완주까지 ' + (paused.questions.length - paused.idx) + '개만 더!'
+      : '탭하면 이어서 계속! · ✕를 누르면 기록 삭제';
   }
 
   // 연속 학습
@@ -1318,6 +1378,8 @@ function startReview(){
 }
 function startSession(cfg){
   S = Object.assign({ idx:0, score:0, combo:0, maxCombo:0, correct:0, wrongQs:[], sched:[], locked:false }, cfg);
+  S.base = S.questions.length; // 웨이브/스퍼트 기준 (재출제 추가 전 문제 수)
+  S.waveCorrect = 0;
   saveSession();
   $('p-day').textContent = S.label;
   $('score').textContent = '0';
@@ -1342,13 +1404,42 @@ function saySpeech(txt, color){
   saySpeech._t = setTimeout(()=>s.classList.remove('show'), 1600);
 }
 
+function inSpurt(){ // 라스트 스퍼트: 본판 마지막 10문제 (x2 점수)
+  return S.base >= 20 && S.idx >= S.base - 10 && S.idx < S.base;
+}
 function renderQuestion(){
   const q = S.questions[S.idx];
   S.locked = false;
   closeSheet();
   $('wc-tag').textContent = q.re ? '🌀 다시 만난 단어!' : '이 단어의 뜻은?';
-  $('p-count').textContent = (S.idx+1) + ' / ' + S.questions.length;
-  $('p-fill').style.width = (S.idx / S.questions.length * 100) + '%';
+  // ----- 전폭 진행바: 깃발/병아리/웨이브 표기 -----
+  const base = S.base, inRe = S.idx >= base, spurt = inSpurt();
+  $('pbar').classList.toggle('spurt', spurt);
+  $('spurt-frame').classList.toggle('on', spurt);
+  const flags = $('p-flags');
+  if (flags.dataset.base != base){
+    flags.dataset.base = base;
+    flags.innerHTML = '';
+    for (let k = 10; k < base; k += 10){
+      const f = document.createElement('span');
+      f.className = 'pflag'; f.textContent = '🚩';
+      f.style.left = (k / base * 100) + '%';
+      f.dataset.k = k;
+      flags.appendChild(f);
+    }
+  }
+  [...flags.children].forEach(f=>f.classList.toggle('passed', S.idx >= +f.dataset.k));
+  const fillPct = Math.min(S.idx / base, 1) * 100;
+  $('p-fill').style.width = fillPct + '%';
+  $('p-chick').style.left = fillPct + '%';
+  if (inRe){
+    $('p-count').textContent = '🌀 복습 라운드 ' + (S.idx - base + 1) + ' / ' + (S.questions.length - base);
+  } else if (spurt){
+    $('p-count').innerHTML = '🔥 <b style="color:#E8481F">라스트 스퍼트 x2!</b> · ' + (S.idx+1) + ' / ' + base;
+  } else {
+    const toFlag = 10 - (S.idx % 10);
+    $('p-count').textContent = (S.idx+1) + ' / ' + base + (base > 10 ? ' · 🚩 깃발까지 ' + toFlag + '개' : '');
+  }
   const w = $('word');
   w.textContent = q.w;
   w.className = q.w.length > 22 ? 'xlong' : (q.w.length > 12 ? 'long' : '');
@@ -1380,9 +1471,10 @@ function answer(i, btn){
 
   if (i === q.ci){
     S.combo++;
-    if (!q.re) S.correct++; // 통계는 첫 시도 기준
+    if (!q.re){ S.correct++; if (S.idx < S.base) S.waveCorrect++; } // 통계는 첫 시도 기준
     S.maxCombo = Math.max(S.maxCombo, S.combo);
-    const gain = q.re ? 5 : 10 + Math.min(10, (S.combo-1)*2);
+    let gain = q.re ? 5 : 10 + Math.min(10, (S.combo-1)*2);
+    if (!q.re && inSpurt()) gain *= 2; // 🔥 라스트 스퍼트 x2
     S.score += gain;
     btn.classList.add('correct');
     btns.forEach((b,bi)=>{ if (bi!==i) b.classList.add('dim'); });
@@ -1500,8 +1592,27 @@ function proceedAfterSpeech(meaning, minDelay){
 }
 function next(){
   S.idx++;
-  if (S.idx >= S.questions.length) finish();
-  else renderQuestion();
+  if (S.idx >= S.questions.length){ finish(); return; }
+  // 🚩 10문제마다 체크포인트 (본판 구간에서만)
+  if (S.idx < S.base && S.idx % 10 === 0 && S.base > 10){ showCheckpoint(); return; }
+  if (S.idx === S.base) bigCheer('🌀 복습 라운드!');
+  renderQuestion();
+}
+function showCheckpoint(){
+  const wc = S.waveCorrect;
+  S.waveCorrect = 0;
+  saveSession();
+  $('cp-sub').textContent = S.idx + ' / ' + S.base + ' 돌파!';
+  $('cp-wave').textContent = '이번 구간 ' + wc + '/10 정답' + (wc === 10 ? ' · 완벽! 🎉' : wc >= 8 ? ' · 좋아요!' : ' · 힘내요!');
+  const cp = $('checkpoint');
+  cp.classList.add('show');
+  sfx.checkpoint(); haptic.combo();
+  burst(innerWidth*.5, innerHeight*.35, 55);
+  const sess = S;
+  setTimeout(()=>{
+    cp.classList.remove('show');
+    if (S === sess && $('screen-quiz').classList.contains('active')) renderQuestion();
+  }, 2100);
 }
 
 /* ================= result ================= */
@@ -1519,10 +1630,13 @@ function countUp(el, to, dur, fmt){
 
 function finish(){
   clearSession(); // 세션 완료 → 이어하기 기록 제거
+  $('spurt-frame').classList.remove('on');
   const total = S.questions.filter(q=>!q.re).length; // 재출제 제외, 첫 시도 기준
   const pct = Math.round(S.correct / total * 100);
   const stars = pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 50 ? 1 : 0;
   const rank = pct === 100 ? 'S' : pct >= 90 ? 'A' : pct >= 70 ? 'B' : pct >= 50 ? 'C' : 'D';
+  const bonus = S.type === 'day' && total >= 30 ? 50 : 0; // 🏁 완주 보너스
+  S.score += bonus;
   logHistory({ t:Date.now(), type:S.type, day:S.day, label:S.label, total, correct:S.correct, pct, score:S.score, maxCombo:S.maxCombo });
   let newRecord = false;
   if (S.type === 'day'){
@@ -1535,7 +1649,7 @@ function finish(){
   }
   const title = pct===100 ? '완벽 그 자체! 🏆' : pct>=90 ? '거의 다 왔어요! 🥇' : pct>=70 ? '잘했어요! 🎉' : pct>=50 ? '좋은 출발! 💪' : '다시 도전! 🌱';
   $('result-title').textContent = title;
-  $('result-msg').textContent = total + '문제 중 ' + S.correct + '개 정답' + (S.maxCombo >= 3 ? ' · 최고 ' + S.maxCombo + '콤보' : '');
+  $('result-msg').textContent = total + '문제 중 ' + S.correct + '개 정답' + (S.maxCombo >= 3 ? ' · 최고 ' + S.maxCombo + '콤보' : '') + (bonus ? ' · 🏁 완주 보너스 +' + bonus + '💎' : '');
   $('result-stars').innerHTML = S.type === 'day'
     ? [1,2,3].map(i=>'<span class="'+(i<=stars?'on':'')+'">★</span>').join('')
     : '';
@@ -1679,7 +1793,7 @@ $('btn-hist-back').onclick = ()=>{ sfx.tap(); renderHome(); show('screen-home');
 $('btn-resume').onclick = ()=>{ sfx.tap(); haptic.tap(); resumeSession(); };
 $('btn-resume-x').onclick = (e)=>{ e.stopPropagation(); sfx.tap(); clearSession(); renderHome(); };
 $('btn-note-back').onclick = ()=>{ sfx.tap(); renderHome(); show('screen-home'); };
-$('btn-quit').onclick = ()=>{ sfx.tap(); try{ speechSynthesis.cancel(); }catch(e){} closeSheet(); S = null; renderHome(); show('screen-home'); bgm.start('home'); };
+$('btn-quit').onclick = ()=>{ sfx.tap(); try{ speechSynthesis.cancel(); }catch(e){} closeSheet(); $('checkpoint').classList.remove('show'); $('spurt-frame').classList.remove('on'); S = null; renderHome(); show('screen-home'); bgm.start('home'); };
 $('btn-home').onclick = ()=>{ sfx.tap(); renderHome(); show('screen-home'); bgm.start('home'); };
 function syncBgmButtons(){
   $('btn-bgm').style.opacity = bgmOn ? '1' : '.4';
