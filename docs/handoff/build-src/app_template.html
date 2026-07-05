@@ -1080,12 +1080,9 @@ function bigCheer(txt){
 
 /* ----- 콤보 마일스톤: 전체화면 폭발 ----- */
 const COMBO_TIER_INFO = {
-  1: { label:'COMBO! 👍', sub:'좋은 흐름이에요!', flash:'#FFD43B', shake:'shake1',
-       shout:'3 콤보!', hap:[15,30,15,30,40] },
-  2: { label:'🔥 ON FIRE! 🔥', sub:'불붙었다!!', flash:'#FF5D5D', shake:'shake2',
-       shout:'5 콤보! 불붙었어요!', hap:[20,30,20,30,20,30,60] },
-  3: { label:'⚡ UNSTOPPABLE ⚡', sub:'막을 수 없어!!!', flash:'#B89BFF', shake:'shake2',
-       shout:'콤보! 완전 미쳤어요!', hap:[30,40,30,40,30,40,30,40,100] },
+  1: { label:'COMBO! 👍', sub:'좋은 흐름이에요!', flash:'#FFD43B', shake:'shake1', hap:[15,30,15,30,40] },
+  2: { label:'🔥 ON FIRE! 🔥', sub:'불붙었다!!', flash:'#FF5D5D', shake:'shake2', hap:[20,30,20,30,20,30,60] },
+  3: { label:'⚡ UNSTOPPABLE ⚡', sub:'막을 수 없어!!!', flash:'#B89BFF', shake:'shake2', hap:[30,40,30,40,30,40,30,40,100] },
 };
 function comboTierOf(combo){
   if (combo === 3) return 1;
@@ -1403,7 +1400,6 @@ function answer(i, btn){
     setMascot(pickEmoji(MASCOT_HAPPY), 'happy');
 
     const tier = comboTierOf(S.combo);
-    let shout = null;
     // 망각곡선 스케줄 진행 (due가 된 카드를 맞히면 레벨업)
     const up = srsCorrect(key);
     if (up) S.sched.push({ w:q.w, ...up });
@@ -1413,9 +1409,8 @@ function answer(i, btn){
       sfx.levelup(); haptic.fanfare();
       burst(innerWidth/2, innerHeight*.3, 70);
     } else if (tier){
-      // 3·5·10·15… 연속 정답: 전체화면 폭발 + 음성 샤우트
+      // 3·5·10·15… 연속 정답: 전체화면 폭발 (사운드는 단계별 팡파르로 충분)
       comboBlast(S.combo, tier);
-      shout = tier === 3 ? S.combo + ' 콤보! 완전 미쳤어요!' : COMBO_TIER_INFO[tier].shout;
       saySpeech('🔥 ' + S.combo + ' 연속 정답!', '#D6455D');
     } else if (up){
       saySpeech(STAGES[up.lv] + ' 레벨업! ' + up.days + '일 뒤에 만나요', '#6D4FE0');
@@ -1425,7 +1420,7 @@ function answer(i, btn){
       sfx.correct(S.combo); haptic.correct(); // 콤보마다 피치 상승
     }
     saveSession(S.idx + 1); // 앱을 닫아도 다음 문제부터 이어하기
-    proceedAfterSpeech(q.m, tier ? 1550 : up ? 1150 : 950, shout);
+    proceedAfterSpeech(q.m, tier ? 1550 : up ? 1150 : 950);
   } else {
     S.combo = 0;
     $('combo-chip').classList.remove('on');
@@ -1477,8 +1472,8 @@ $('sheet-tts').onclick = ()=>{
   const q = sheetQ;
   speak(q.w.replace(/\[.*?\]/g,' ').replace(/\(.*?\)/g,' '), 'en-US', .92, ()=>{ if (sheetQ === q) speakMeaning(q.m); });
 };
-// 정오답 효과음이 끝난 뒤 (마일스톤이면 샤우트 먼저) 한글 뜻을 읽어주고, 다 읽으면 다음 문제로
-function proceedAfterSpeech(meaning, minDelay, shout){
+// 정오답 효과음이 끝난 뒤 한글 뜻을 읽어주고, 다 읽으면 다음 문제로
+function proceedAfterSpeech(meaning, minDelay){
   const sess = S;
   let minDone = false, ttsDone = false, advanced = false;
   const go = ()=>{
@@ -1493,11 +1488,9 @@ function proceedAfterSpeech(meaning, minDelay, shout){
   }
   setTimeout(()=>{
     if (advanced) return;
-    const readMeaning = ()=>{ if (!advanced) speakMeaning(meaning, ()=>{ ttsDone = true; go(); }); };
-    if (shout) speak(shout, 'ko-KR', 1.12, readMeaning); // 콤보 샤우트 → 뜻 읽기 순서
-    else readMeaning();
-    setTimeout(()=>{ if (!ttsDone){ ttsDone = true; go(); } }, shout ? 8000 : 6000); // 안전장치
-  }, shout ? 560 : 430);
+    speakMeaning(meaning, ()=>{ ttsDone = true; go(); });
+    setTimeout(()=>{ if (!ttsDone){ ttsDone = true; go(); } }, 6000); // 안전장치
+  }, 430);
 }
 function next(){
   S.idx++;
