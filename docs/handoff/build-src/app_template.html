@@ -507,7 +507,8 @@ h1 .grad{background:linear-gradient(90deg,var(--purple),var(--pink),var(--orange
       </span>
       <span class="rc-x" id="btn-resume-x" role="button" aria-label="이어하기 삭제">✕</span>
     </div>
-    <div class="srs-card" id="srs-card">
+    <!-- 망각곡선 복습 카드: 홈 화면 단순화를 위해 일단 숨김 (기능·데이터는 유지) -->
+    <div class="srs-card" id="srs-card" style="display:none">
       <div class="srs-head">🧠 망각곡선 복습 <span class="cycle">복습 주기<br>1일→3일→7일→14일→30일</span></div>
       <div class="srs-info" id="srs-info"></div>
       <div class="srs-btns">
@@ -1256,7 +1257,7 @@ function renderHome(){
   $('stat-master').textContent = '👑 ' + masters;
 
   const card = $('srs-card');
-  card.classList.toggle('show', cards.length > 0);
+  card.classList.toggle('show', false); // 홈 단순화: 복습 카드 숨김 (다시 켜려면 cards.length > 0 로)
   if (cards.length){
     let info;
     if (due.length){
