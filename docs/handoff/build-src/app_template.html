@@ -51,6 +51,76 @@ body{
 .screen.active{display:flex;}
 @keyframes pop-in{from{opacity:0;transform:scale(.96) translateY(10px)}to{opacity:1;transform:none}}
 
+/* ---------- TITLE ---------- */
+#screen-title{justify-content:center;}
+.title-wrap{text-align:center;padding-bottom:8vh;}
+.title-mascot{font-size:96px;display:inline-block;animation:bounce 2s ease-in-out infinite;filter:drop-shadow(0 8px 0 #2B214326);}
+.title-logo{font-size:56px;letter-spacing:-2px;margin-top:10px;line-height:1.05;}
+.title-logo .grad{background:linear-gradient(90deg,var(--purple),var(--pink),var(--orange));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.title-sub{font-size:16px;font-weight:400;color:#6B6288;margin-top:10px;}
+.start-btn{
+  position:relative;overflow:hidden;margin-top:40px;
+  border:4px solid var(--line);border-radius:999px;box-shadow:6px 6px 0 var(--line);
+  background:linear-gradient(100deg,var(--yellow),var(--orange));
+  font:inherit;font-size:26px;color:var(--ink);padding:20px 44px;cursor:pointer;
+  animation:start-pulse 1.6s ease-in-out infinite;
+}
+.start-btn:active{transform:translate(4px,4px);box-shadow:1px 1px 0 var(--line);animation:none;}
+@keyframes start-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.start-btn::after{
+  content:'';position:absolute;top:-40%;left:-70%;width:44%;height:180%;
+  background:linear-gradient(100deg,transparent,#FFFFFF88,transparent);
+  transform:rotate(18deg);animation:shine 2.4s ease-in-out infinite;
+}
+@keyframes shine{0%,55%{left:-70%}90%,100%{left:130%}}
+.title-foot{font-size:13px;font-weight:400;color:#9A90B5;margin-top:34px;letter-spacing:2px;}
+
+/* ---------- 모험 맵 ---------- */
+#world-map{display:flex;flex-direction:column;gap:16px;padding-bottom:14px;}
+.world{border:3px solid var(--line);border-radius:22px;box-shadow:var(--hard);overflow:hidden;}
+.world-banner{
+  display:flex;align-items:center;gap:8px;font-size:17px;padding:12px 16px;
+  border-bottom:3px solid var(--line);background:#FFFFFFAA;
+}
+.world-banner .wb-prog{margin-left:auto;font-size:13px;border:2px solid var(--line);border-radius:999px;padding:3px 11px;background:#fff;}
+.world-path{position:relative;}
+.world-path svg{position:absolute;inset:0;width:100%;height:100%;}
+.wp-base{fill:none;stroke:#2B214333;stroke-width:6;stroke-dasharray:2 10;stroke-linecap:round;vector-effect:non-scaling-stroke;}
+.wp-done{fill:none;stroke-width:6;stroke-linecap:round;vector-effect:non-scaling-stroke;}
+.world-deco{position:absolute;font-size:24px;opacity:.4;pointer-events:none;}
+.stage{
+  position:absolute;width:62px;height:62px;transform:translateX(-50%);
+  border:3px solid var(--line);border-radius:999px;box-shadow:0 5px 0 var(--line);
+  background:#fff;font:inherit;color:var(--ink);cursor:pointer;transition:transform .1s;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;z-index:1;
+}
+.stage:active{transform:translateX(-50%) translateY(4px);box-shadow:0 1px 0 var(--line);}
+.stage .st-num{font-size:19px;}
+.stage .st-stars{font-size:9px;letter-spacing:1px;margin-top:3px;color:#D9D3E8;}
+.stage .st-stars .on{color:#FFB800;}
+.stage.cleared{background:linear-gradient(160deg,#FFF6D6,#FFECB3);}
+.stage.perfect{background:linear-gradient(160deg,#E9E1FF,#D3F5E9);}
+.stage .st-crown{position:absolute;top:-13px;right:-5px;font-size:17px;transform:rotate(18deg);}
+.stage.locked{background:#EFEBF7;color:#B9B0CE;box-shadow:0 5px 0 #2B214355;cursor:not-allowed;}
+.stage.locked .st-num{font-size:17px;}
+.stage.current{
+  width:70px;height:70px;border-width:4px;background:#fff;
+  animation:cur-pulse 1.4s ease-in-out infinite;z-index:2;
+}
+@keyframes cur-pulse{0%,100%{box-shadow:0 5px 0 var(--line), 0 0 0 0 #FFB80088}50%{box-shadow:0 5px 0 var(--line), 0 0 0 14px #FFB80000}}
+.stage .st-chick{position:absolute;top:-34px;font-size:30px;animation:bounce 1.6s ease-in-out infinite;filter:drop-shadow(0 3px 0 #2B214333);}
+.stage .st-flag{position:absolute;top:-16px;left:-8px;font-size:18px;transform:rotate(-14deg);}
+.stage.shake-no{animation:m-sad .4s ease;}
+
+/* 토스트 */
+.toast{
+  position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:80;
+  background:var(--ink);color:#fff;border-radius:999px;padding:11px 20px;font-size:14px;
+  border:3px solid #fff;box-shadow:0 4px 14px #2B214355;white-space:nowrap;
+  animation:toast-in 1.9s ease forwards;pointer-events:none;
+}
+@keyframes toast-in{0%{opacity:0;transform:translateX(-50%) translateY(14px)}10%,80%{opacity:1;transform:translateX(-50%)}100%{opacity:0;transform:translateX(-50%) translateY(-6px)}}
+
 /* ---------- HOME ---------- */
 .home-head{text-align:center;padding:30px 0 8px;}
 .home-mascot{font-size:60px;display:inline-block;animation:bounce 2.2s ease-in-out infinite;filter:drop-shadow(0 6px 0 #2B214322);}
@@ -405,8 +475,19 @@ h1 .grad{background:linear-gradient(90deg,var(--purple),var(--pink),var(--orange
 <div class="bg-deco" id="bg-deco"></div>
 <div id="app">
 
+  <!-- TITLE -->
+  <section class="screen active" id="screen-title">
+    <div class="title-wrap">
+      <span class="title-mascot">🐥</span>
+      <h1 class="title-logo">보카 <span class="grad">퀘스트</span></h1>
+      <div class="title-sub">심슨 보카 2027 · 단어 대모험</div>
+      <button class="start-btn" id="btn-start"><span>▶&nbsp; GAME START</span></button>
+      <div class="title-foot">5 WORLDS · 48 DAYS · 2,400 WORDS</div>
+    </div>
+  </section>
+
   <!-- HOME -->
-  <section class="screen active" id="screen-home">
+  <section class="screen" id="screen-home">
     <div class="home-head">
       <span class="home-mascot">🐥</span>
       <h1>보카 <span class="grad">퀘스트</span></h1>
@@ -434,8 +515,8 @@ h1 .grad{background:linear-gradient(90deg,var(--purple),var(--pink),var(--orange
         <button class="srs-btn note" id="btn-note">📒 복습 노트</button>
       </div>
     </div>
-    <div class="day-title">🗓️ DAY를 골라 시작! <button class="chip-btn" id="btn-bgm-home">🎵 음악</button><button class="chip-btn" id="btn-hist" style="margin-left:8px">📊 기록</button></div>
-    <div class="day-grid" id="day-grid"></div>
+    <div class="day-title">🗺️ 단어 대모험 <button class="chip-btn" id="btn-bgm-home">🎵 음악</button><button class="chip-btn" id="btn-hist" style="margin-left:8px">📊 기록</button></div>
+    <div id="world-map"></div>
   </section>
 
   <!-- QUIZ -->
@@ -913,6 +994,7 @@ function speak(text, lang, rate, onend){
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = lang || 'en-US'; u.rate = rate || .92;
+    u.volume = .55; // 효과음보다 도드라지지 않게 음성은 낮춤
     bgm.duck(true); // 말하는 동안 배경음악 볼륨 낮춤
     let done = false;
     const fin = ()=>{ if (!done){ done = true; bgm.duck(false); if (onend) onend(); } };
@@ -1036,31 +1118,116 @@ function comboBlast(combo, tier){
   hap(info.hap);
 }
 
-/* ================= home ================= */
+/* ================= home & 모험 맵 ================= */
+const WORLDS = [
+  { name:'새싹 들판', emoji:'🌱', from:0,  to:9,  bg:'linear-gradient(170deg,#EAF9E5,#CFF0DA)', accent:'#3ECF8E', deco:['🌱','🌼','🍀','🦋'] },
+  { name:'파도 해변', emoji:'🏖️', from:10, to:19, bg:'linear-gradient(170deg,#E3F4FF,#CBE9FA)', accent:'#4DA3FF', deco:['🌊','🐚','⛱️','🐠'] },
+  { name:'단풍 숲',  emoji:'🍁', from:20, to:29, bg:'linear-gradient(170deg,#FFF3E0,#FFE2C4)', accent:'#FF9A3C', deco:['🍁','🍄','🐿️','🍂'] },
+  { name:'눈꽃 설원', emoji:'❄️', from:30, to:39, bg:'linear-gradient(170deg,#EDF3FF,#DFE8FF)', accent:'#7C9EFF', deco:['❄️','⛄','🌨️','🧊'] },
+  { name:'별빛 우주', emoji:'🌌', from:40, to:47, bg:'linear-gradient(170deg,#EFE9FF,#DCD0FA)', accent:'#7C5CFF', deco:['⭐','🪐','🚀','🌙'] },
+];
+const dayCleared = d => { const b = store.best[d]; return !!(b && b.stars >= 1); };
+// 해금: 첫 DAY, 이전 DAY 클리어, 또는 예전에 플레이한 적 있는 DAY (기존 사용자 보호)
+const dayUnlocked = d => d === 0 || !!store.best[d] || dayCleared(d - 1);
+
+function tapDay(d){
+  sfx.tap(); haptic.tap();
+  const paused = loadSession();
+  if (paused && paused.type === 'day' && paused.day === d){ resumeSession(); return; }
+  startDay(d);
+}
+function toast(msg){
+  const el = document.createElement('div');
+  el.className = 'toast'; el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 1900);
+}
+function renderMap(){
+  const map = $('world-map'); map.innerHTML = '';
+  const STEP = 96, PAD = 46;
+  // 현재 위치: 아직 클리어 못한 첫 해금 DAY (전부 클리어면 마지막 DAY)
+  let frontier = DAYS - 1;
+  for (let d = 0; d < DAYS; d++){ if (dayUnlocked(d) && !dayCleared(d)){ frontier = d; break; } }
+  for (let wi = 0; wi < WORLDS.length; wi++){
+    const w = WORLDS[wi];
+    const n = w.to - w.from + 1;
+    const H = n * STEP + 30;
+    const world = document.createElement('div');
+    world.className = 'world';
+    const clearedCnt = Array.from({length:n}, (_,i)=>w.from+i).filter(dayCleared).length;
+    // 굽이치는 좌표
+    const pts = [];
+    for (let i = 0; i < n; i++) pts.push({ x: 50 + 31 * Math.sin(i * .95 + wi * 1.3), y: PAD + i * STEP });
+    const pathD = pts.map((p,i)=> i === 0
+      ? 'M ' + p.x + ' ' + p.y
+      : 'C ' + pts[i-1].x + ' ' + (pts[i-1].y + 52) + ', ' + p.x + ' ' + (p.y - 52) + ', ' + p.x + ' ' + p.y
+    ).join(' ');
+    // 걸어온 길 색칠: 연속 클리어 구간 + 지금 서 있는 노드까지
+    let prog = 0;
+    while (prog < n && dayCleared(w.from + prog)) prog++;
+    prog = Math.min(prog, n - 1);
+    const progD = prog > 0 ? pts.slice(0, prog + 1).map((p,i)=> i === 0
+      ? 'M ' + p.x + ' ' + p.y
+      : 'C ' + pts[i-1].x + ' ' + (pts[i-1].y + 52) + ', ' + p.x + ' ' + (p.y - 52) + ', ' + p.x + ' ' + p.y
+    ).join(' ') : '';
+    let decoHtml = '';
+    for (let i = 0; i < 6; i++){
+      decoHtml += '<span class="world-deco" style="left:' + (8 + (i * 37) % 80) + '%;top:' + (40 + i * (H - 80) / 6) + 'px">' + w.deco[i % w.deco.length] + '</span>';
+    }
+    world.innerHTML =
+      '<div class="world-banner">' + w.emoji + ' 월드 ' + (wi+1) + ' · ' + w.name +
+        '<span class="wb-prog">' + clearedCnt + '/' + n + '</span></div>' +
+      '<div class="world-path" style="height:' + H + 'px;background:' + w.bg + '">' +
+        '<svg viewBox="0 0 100 ' + H + '" preserveAspectRatio="none">' +
+          '<path class="wp-base" d="' + pathD + '"/>' +
+          (progD ? '<path class="wp-done" style="stroke:' + w.accent + '" d="' + progD + '"/>' : '') +
+        '</svg>' + decoHtml +
+      '</div>';
+    const pathBox = world.querySelector('.world-path');
+    for (let i = 0; i < n; i++){
+      const d = w.from + i;
+      const b = store.best[d];
+      const s = b ? b.stars : 0;
+      const unlocked = dayUnlocked(d);
+      const btn = document.createElement('button');
+      const isCur = d === frontier && unlocked;
+      btn.className = 'stage' +
+        (!unlocked ? ' locked' : dayCleared(d) ? (s === 3 ? ' perfect' : ' cleared') : '') +
+        (isCur ? ' current' : '');
+      btn.style.left = pts[i].x + '%';
+      btn.style.top = (pts[i].y - (isCur ? 35 : 31)) + 'px';
+      if (!unlocked){
+        btn.innerHTML = '<span class="st-num">🔒</span>';
+        btn.onclick = ()=>{
+          btn.classList.remove('shake-no'); void btn.offsetWidth; btn.classList.add('shake-no');
+          haptic.tap();
+          toast('🔒 DAY ' + d + '를 클리어하면 열려요!');
+        };
+      } else {
+        btn.innerHTML =
+          (isCur ? '<span class="st-chick">🐥</span>' : '') +
+          (s === 3 ? '<span class="st-crown">👑</span>' : '') +
+          (i === n - 1 ? '<span class="st-flag">🚩</span>' : '') +
+          '<span class="st-num">' + (d+1) + '</span>' +
+          '<span class="st-stars">' + [1,2,3].map(k=>'<span class="'+(k<=s?'on':'')+'">★</span>').join('') + '</span>';
+        btn.onclick = ()=>tapDay(d);
+      }
+      pathBox.appendChild(btn);
+    }
+    map.appendChild(world);
+  }
+}
+function scrollToCurrent(){
+  const cur = document.querySelector('.stage.current');
+  if (cur) cur.scrollIntoView({ block:'center', behavior:'smooth' });
+}
 function renderHome(){
   let cleared = 0, stars = 0;
-  const grid = $('day-grid'); grid.innerHTML = '';
   for (let d=0; d<DAYS; d++){
     const b = store.best[d];
     if (b){ if (b.stars >= 1) cleared++; stars += b.stars; }
-    const cell = document.createElement('button');
-    cell.className = 'day-cell' + (b && b.stars >= 1 ? (b.stars===3 ? ' perfect' : ' done') : '');
-    const s = b ? b.stars : 0;
-    cell.innerHTML =
-      (s===3 ? '<span class="crown">👑</span>' : '') +
-      '<div class="dnum">' + (d+1) + '</div>' +
-      '<div class="dstars">' +
-        [1,2,3].map(i=>'<span class="'+(i<=s?'on':'')+'">★</span>').join('') +
-      '</div>';
-    cell.onclick = ()=>{
-      sfx.tap(); haptic.tap();
-      // 이 DAY를 풀다 만 기록이 있으면 이어서 진행
-      const paused = loadSession();
-      if (paused && paused.type === 'day' && paused.day === d){ resumeSession(); return; }
-      startDay(d);
-    };
-    grid.appendChild(cell);
   }
+  renderMap();
   $('stat-days').textContent = cleared + ' / ' + DAYS;
   $('stat-stars').textContent = '⭐ ' + stars;
 
@@ -1484,6 +1651,15 @@ function renderNote(){
 }
 
 /* ================= wiring ================= */
+$('btn-start').onclick = ()=>{
+  // GAME START = 오디오 잠금해제 제스처 → BGM 자동 시작
+  unlockAudio();
+  sfx.fanfare(); haptic.combo();
+  renderHome();
+  show('screen-home');
+  bgm.start('home');
+  setTimeout(scrollToCurrent, 200);
+};
 $('btn-review').onclick = function(){
   if (this.classList.contains('off')){ sfx.tap(); saySpeechHome(); return; }
   sfx.tap(); haptic.tap(); startReview();
