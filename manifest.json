@@ -1,0 +1,14 @@
+{
+  "name": "보카 퀘스트 · 심슨 보카 2027",
+  "short_name": "보카 퀘스트",
+  "description": "심슨 보카 2027 하루 50단어 게임형 복습 앱 — 망각곡선 복습, 콤보, 오답노트",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF7E8",
+  "theme_color": "#FFF7E8",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
