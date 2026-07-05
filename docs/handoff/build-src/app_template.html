@@ -121,6 +121,68 @@ body{
 }
 @keyframes toast-in{0%{opacity:0;transform:translateX(-50%) translateY(14px)}10%,80%{opacity:1;transform:translateX(-50%)}100%{opacity:0;transform:translateX(-50%) translateY(-6px)}}
 
+/* ---------- PROFILE (누가 학습하나요?) ---------- */
+#screen-profile{justify-content:center;}
+.prof-head{text-align:center;padding:10px 0 22px;}
+.prof-head h2{font-size:30px;letter-spacing:-1px;}
+.prof-sub{font-size:14px;font-weight:400;color:#6B6288;margin-top:8px;}
+.prof-grid{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;padding:0 6px 8px;}
+.prof-card{
+  width:104px;border:none;background:none;font:inherit;color:var(--ink);cursor:pointer;text-align:center;
+  transition:transform .12s;
+}
+.prof-card:active{transform:scale(.93);}
+.prof-face{
+  width:92px;height:92px;margin:0 auto;border-radius:28px;border:4px solid var(--line);
+  box-shadow:5px 5px 0 var(--line);display:flex;align-items:center;justify-content:center;font-size:46px;
+}
+.prof-card:nth-child(4n+1) .prof-face{background:linear-gradient(160deg,#FFF6D6,#FFE3AB);}
+.prof-card:nth-child(4n+2) .prof-face{background:linear-gradient(160deg,#E3F4FF,#C9E8FA);}
+.prof-card:nth-child(4n+3) .prof-face{background:linear-gradient(160deg,#FFE9F0,#FFD1E0);}
+.prof-card:nth-child(4n+4) .prof-face{background:linear-gradient(160deg,#E9E1FF,#D9CCFA);}
+.prof-nick{font-size:16px;margin-top:10px;word-break:keep-all;}
+.prof-meta{font-size:11px;font-weight:400;color:#8A80A6;margin-top:3px;}
+.prof-card.add .prof-face{background:#fff;color:#B9B0CE;font-size:40px;border-style:dashed;}
+.prof-del{
+  position:absolute;margin-left:66px;margin-top:-6px;width:26px;height:26px;border-radius:99px;
+  border:3px solid var(--line);background:var(--red);color:#fff;font:inherit;font-size:12px;display:none;
+  align-items:center;justify-content:center;cursor:pointer;z-index:2;
+}
+.prof-grid.manage .prof-del{display:flex;}
+.prof-create{
+  background:var(--card);border:3px solid var(--line);border-radius:22px;box-shadow:var(--hard);
+  padding:18px;margin:8px 2px;
+}
+.pc-title{font-size:20px;margin-bottom:4px;}
+.pc-label{font-size:13px;font-weight:400;color:#6B6288;margin:14px 0 8px;}
+.pc-avatars{display:flex;flex-wrap:wrap;gap:8px;}
+.pc-av{
+  width:52px;height:52px;border:3px solid #E4DEF2;border-radius:16px;background:#fff;font-size:26px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s;
+}
+.pc-av.sel{border-color:var(--line);background:linear-gradient(160deg,#FFF6D6,#FFECB3);box-shadow:3px 3px 0 var(--line);transform:scale(1.06);}
+.pc-input{
+  width:100%;border:3px solid var(--line);border-radius:16px;padding:14px 16px;font:inherit;font-size:18px;
+  color:var(--ink);background:#fff;margin-bottom:14px;user-select:text;-webkit-user-select:text;
+}
+.pc-input:focus{outline:none;box-shadow:3px 3px 0 var(--line);}
+.prof-sync{
+  text-align:center;font-size:13px;font-weight:400;color:#6B6288;padding:16px 4px 6px;line-height:1.7;
+}
+.prof-sync .chip-btn{margin:0 3px;}
+.prof-sync .sync-input{
+  width:220px;border:3px solid var(--line);border-radius:12px;padding:8px 10px;font:inherit;font-size:13px;
+  user-select:text;-webkit-user-select:text;
+}
+/* 홈 프로필 칩 */
+.me-chip{
+  display:inline-flex;align-items:center;gap:7px;border:3px solid var(--line);border-radius:999px;
+  background:var(--card);box-shadow:3px 3px 0 var(--line);padding:5px 14px 5px 7px;font:inherit;font-size:14px;
+  color:var(--ink);cursor:pointer;margin-top:10px;transition:transform .1s;
+}
+.me-chip:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--line);}
+.me-chip .mc-face{width:26px;height:26px;border-radius:9px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px;background:#FFF6D6;}
+
 /* ---------- HOME ---------- */
 .home-head{text-align:center;padding:30px 0 8px;}
 .home-mascot{font-size:60px;display:inline-block;animation:bounce 2.2s ease-in-out infinite;filter:drop-shadow(0 6px 0 #2B214322);}
@@ -550,12 +612,32 @@ h1 .grad{background:linear-gradient(90deg,var(--purple),var(--pink),var(--orange
     </div>
   </section>
 
+  <!-- PROFILE (넷플릭스식 프로필 선택) -->
+  <section class="screen" id="screen-profile">
+    <div class="prof-head">
+      <h2>누가 학습하나요?</h2>
+      <div class="prof-sub">프로필별로 진행도·복습·기록이 따로 쌓여요</div>
+    </div>
+    <div class="prof-grid" id="prof-grid"></div>
+    <div class="prof-create" id="prof-create" style="display:none">
+      <div class="pc-title" id="pc-title">✨ 새 프로필 만들기</div>
+      <div class="pc-label">아바타 고르기</div>
+      <div class="pc-avatars" id="pc-avatars"></div>
+      <div class="pc-label">닉네임 <b style="color:var(--red)">(필수)</b></div>
+      <input class="pc-input" id="pc-nick" maxlength="8" placeholder="예: 병아리대장" autocomplete="off">
+      <button class="big-btn primary" id="pc-go">🐣 이 프로필로 시작!</button>
+      <button class="big-btn plain" id="pc-cancel" style="display:none">↩️ 돌아가기</button>
+    </div>
+    <div class="prof-sync" id="prof-sync"></div>
+  </section>
+
   <!-- HOME -->
   <section class="screen" id="screen-home">
     <div class="home-head">
       <span class="home-mascot">🐥</span>
       <h1>보카 <span class="grad">퀘스트</span></h1>
       <div class="home-sub">심슨 보카 2027 · 하루 50단어 게임 복습</div>
+      <button class="me-chip" id="me-chip"><span class="mc-face" id="mc-face">🐥</span><span id="mc-nick">프로필</span> <span id="mc-sync">·</span></button>
       <div class="home-streak" id="home-streak"></div>
     </div>
     <div class="stat-row">
@@ -700,13 +782,15 @@ __VOCAB_SCRIPT__
 'use strict';
 /* ================= data & storage ================= */
 const DAYS = VOCAB.length;
-const LS_BEST = 'vocaQuest.best';    // {day: {stars,pct,score}}
-const LS_SRS  = 'vocaQuest.srs';     // {"d-i": {lv,due,rc,wc}}
-const LS_WRONG_OLD = 'vocaQuest.wrong';
+// 기기 설정 (프로필 무관)
 const LS_MUTE = 'vocaQuest.mute';
-const LS_SESS = 'vocaQuest.session'; // 진행 중 세션 (이어하기)
-const LS_HIST = 'vocaQuest.hist';    // 완료한 세션 기록
-const LS_BGM = 'vocaQuest.bgm';      // 배경음악 on/off
+const LS_BGM = 'vocaQuest.bgm';
+const LS_PROFILES = 'vocaQuest.profiles'; // [{id,nick,av,ts,created}]
+const LS_LAST = 'vocaQuest.lastProfile';
+const LS_SYNC = 'vocaQuest.syncCode';     // 가족 코드 (kvdb.io 버킷)
+// 프로필별 저장 키
+let PID = null;
+const pk = sfx => 'vocaQuest.p.' + PID + '.' + sfx;
 
 const DAY_MS = 86400000;
 const SRS_IV = [1, 3, 7, 14, 30];              // 레벨별 다음 복습까지 일수 (망각곡선)
@@ -715,26 +799,161 @@ const STAGES = ['🌰','🌱','🌿','🌳','🌸','👑'];
 const STAGE_NAMES = ['씨앗','새싹','줄기','나무','꽃','마스터'];
 
 const store = {
-  best: JSON.parse(localStorage.getItem(LS_BEST) || '{}'),
-  srs: JSON.parse(localStorage.getItem(LS_SRS) || '{}'),
-  hist: JSON.parse(localStorage.getItem(LS_HIST) || '[]'),
-  saveBest(){ localStorage.setItem(LS_BEST, JSON.stringify(this.best)); },
-  saveSrs(){ localStorage.setItem(LS_SRS, JSON.stringify(this.srs)); },
-  saveHist(){ localStorage.setItem(LS_HIST, JSON.stringify(this.hist)); },
+  best: {}, srs: {}, hist: [],
+  load(){
+    const g = (sfx, dflt)=>{ try{ return JSON.parse(localStorage.getItem(pk(sfx)) || dflt); }catch(e){ return JSON.parse(dflt); } };
+    this.best = g('best', '{}');
+    this.srs = g('srs', '{}');
+    this.hist = g('hist', '[]');
+  },
+  saveBest(){ localStorage.setItem(pk('best'), JSON.stringify(this.best)); scheduleSync(); },
+  saveSrs(){ localStorage.setItem(pk('srs'), JSON.stringify(this.srs)); scheduleSync(); },
+  saveHist(){ localStorage.setItem(pk('hist'), JSON.stringify(this.hist)); scheduleSync(); },
 };
-// 구버전 오답노트 → 망각곡선 카드로 이전
-(function migrate(){
-  const old = localStorage.getItem(LS_WRONG_OLD);
-  if (!old) return;
-  try{
-    for (const k of JSON.parse(old)){
-      if (!store.srs[k]) store.srs[k] = { lv:0, due:Date.now(), rc:0, wc:1 };
-    }
-    store.saveSrs();
-  }catch(e){}
-  localStorage.removeItem(LS_WRONG_OLD);
-})();
+function getProfiles(){ try{ return JSON.parse(localStorage.getItem(LS_PROFILES) || '[]'); }catch(e){ return []; } }
+function saveProfiles(list){ localStorage.setItem(LS_PROFILES, JSON.stringify(list)); }
+// 프로필 도입 전(단일 사용자) 데이터를 첫 프로필로 승계
+function adoptLegacy(){
+  const oldWrong = localStorage.getItem('vocaQuest.wrong');
+  if (oldWrong){
+    try{
+      const srs = JSON.parse(localStorage.getItem('vocaQuest.srs') || '{}');
+      for (const k of JSON.parse(oldWrong)) if (!srs[k]) srs[k] = { lv:0, due:Date.now(), rc:0, wc:1 };
+      localStorage.setItem('vocaQuest.srs', JSON.stringify(srs));
+    }catch(e){}
+    localStorage.removeItem('vocaQuest.wrong');
+  }
+  for (const sfx of ['best','srs','hist','session']){
+    const v = localStorage.getItem('vocaQuest.' + sfx);
+    if (v != null && localStorage.getItem(pk(sfx)) == null) localStorage.setItem(pk(sfx), v);
+    localStorage.removeItem('vocaQuest.' + sfx);
+  }
+}
 let muted = localStorage.getItem(LS_MUTE) === '1';
+
+/* ================= 기기 간 동기화 (가족 코드, kvdb.io) ================= */
+const SYNC_HOST = 'https://kvdb.io/';
+let syncCode = localStorage.getItem(LS_SYNC) || '';
+let syncState = syncCode ? 'idle' : 'off'; // off|idle|busy|ok|err
+function fetchT(url, opts){
+  const c = new AbortController();
+  const t = setTimeout(()=>c.abort(), 9000);
+  return fetch(url, Object.assign({ signal:c.signal }, opts)).finally(()=>clearTimeout(t));
+}
+async function cloudGet(key){ // undefined=통신실패, null=키 없음
+  if (!syncCode) return undefined;
+  try{
+    const r = await fetchT(SYNC_HOST + syncCode + '/' + key);
+    if (r.status === 404) return null;
+    if (!r.ok) throw 0;
+    return await r.text();
+  }catch(e){ return undefined; }
+}
+async function cloudPut(key, text){
+  if (!syncCode) return false;
+  try{
+    const r = await fetchT(SYNC_HOST + syncCode + '/' + key, { method:'POST', body:text });
+    return r.ok;
+  }catch(e){ return false; }
+}
+async function cloudCreate(){ // 가족 클라우드(버킷) 새로 만들기
+  try{
+    const r = await fetchT(SYNC_HOST, { method:'POST', body:'email=' });
+    if (!r.ok) return false;
+    const code = (await r.text()).trim();
+    if (!/^[A-Za-z0-9_-]{8,64}$/.test(code)) return false;
+    syncCode = code;
+    localStorage.setItem(LS_SYNC, code);
+    syncState = 'idle';
+    return true;
+  }catch(e){ return false; }
+}
+function syncIcon(){ return { off:'', idle:'☁️', busy:'🔄', ok:'☁️', err:'⚠️' }[syncState] || ''; }
+function renderSyncBits(){ const el = $('mc-sync'); if (el) el.textContent = syncIcon(); }
+// 프로필 목록 동기화 (합집합, 최신 ts 우선)
+async function pullRegistry(){
+  const t = await cloudGet('reg');
+  if (t === undefined || t === null) return t;
+  try{
+    const remote = JSON.parse(t);
+    const byId = {};
+    for (const p of [...remote, ...getProfiles()]){
+      if (p && p.id && (!byId[p.id] || (p.ts||0) > (byId[p.id].ts||0))) byId[p.id] = p;
+    }
+    const merged = Object.values(byId).sort((a,b)=>(a.created||0)-(b.created||0));
+    saveProfiles(merged);
+    return merged;
+  }catch(e){ return undefined; }
+}
+function pushRegistry(){ return cloudPut('reg', JSON.stringify(getProfiles())); }
+// 학습 데이터 압축 인코딩 (용량 제한 대응)
+function encodeSrs(srs){
+  return Object.entries(srs).map(([k,c])=>k+':'+c.lv+','+(c.due ? Math.round(c.due/60000) : '')+','+c.rc+','+c.wc).join(';');
+}
+function decodeSrs(str){
+  const out = {};
+  if (!str) return out;
+  for (const row of str.split(';')){
+    const ci = row.indexOf(':');
+    if (ci < 0) continue;
+    const k = row.slice(0, ci);
+    const [lv, due, rc, wc] = row.slice(ci+1).split(',');
+    out[k] = { lv:+lv, due: due === '' ? null : (+due)*60000, rc:+rc||0, wc:+wc||0 };
+  }
+  return out;
+}
+// 병합: 별점은 높은 쪽, 복습 카드는 진행 많은 쪽, 기록은 합집합
+function mergeRemote(remote){
+  for (const [d, rb] of Object.entries(remote.best || {})){
+    const lb = store.best[d];
+    if (!lb || rb.pct > lb.pct || (rb.pct === lb.pct && rb.score > lb.score)) store.best[d] = rb;
+  }
+  for (const [k, rc] of Object.entries(remote.srs || {})){
+    const lc = store.srs[k];
+    if (!lc || (rc.rc + rc.wc) > (lc.rc + lc.wc)) store.srs[k] = rc;
+  }
+  const seen = new Set(store.hist.map(h=>h.t));
+  for (const h of (remote.hist || [])) if (h && !seen.has(h.t)) store.hist.push(h);
+  store.hist.sort((a,b)=>b.t-a.t);
+  if (store.hist.length > 300) store.hist.length = 300;
+  localStorage.setItem(pk('best'), JSON.stringify(store.best));
+  localStorage.setItem(pk('srs'), JSON.stringify(store.srs));
+  localStorage.setItem(pk('hist'), JSON.stringify(store.hist));
+}
+async function pullProfile(){
+  if (!syncCode || !PID) return;
+  const pid = PID;
+  syncState = 'busy'; renderSyncBits();
+  const [core, hist] = await Promise.all([cloudGet('d_' + pid), cloudGet('h_' + pid)]);
+  if (PID !== pid) return;
+  if (core === undefined && hist === undefined){ syncState = 'err'; renderSyncBits(); return; }
+  const remote = {};
+  try{
+    if (core){ const o = JSON.parse(core); remote.best = o.b || {}; remote.srs = decodeSrs(o.s); }
+    if (hist) remote.hist = JSON.parse(hist).map(r=>({ t:r[0], type:r[1] ? 'review' : 'day', day:r[2], label:r[3], total:r[4], correct:r[5], pct:r[6], score:r[7], maxCombo:r[8] }));
+  }catch(e){}
+  mergeRemote(remote);
+  syncState = 'ok'; renderSyncBits();
+  pushProfile(); // 병합 결과 재업로드
+}
+let syncTimer = null;
+function scheduleSync(){
+  if (!syncCode || !PID) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(pushProfile, 2500);
+}
+async function pushProfile(){
+  if (!syncCode || !PID) return;
+  const pid = PID;
+  clearTimeout(syncTimer); syncTimer = null;
+  syncState = 'busy'; renderSyncBits();
+  const core = JSON.stringify({ b: store.best, s: encodeSrs(store.srs), t: Date.now() });
+  const hist = JSON.stringify(store.hist.slice(0, 150).map(h=>[h.t, h.type === 'review' ? 1 : 0, h.day == null ? null : h.day, h.label, h.total, h.correct, h.pct, h.score, h.maxCombo]));
+  const [ok1, ok2] = await Promise.all([cloudPut('d_' + pid, core), cloudPut('h_' + pid, hist)]);
+  syncState = (ok1 && ok2) ? 'ok' : 'err';
+  renderSyncBits();
+}
+document.addEventListener('visibilitychange', ()=>{ if (document.hidden && syncTimer) pushProfile(); });
 
 /* ================= helpers ================= */
 const $ = id => document.getElementById(id);
@@ -756,6 +975,125 @@ function fmtDue(due){
   return Math.round(diff/DAY_MS) + '일 후';
 }
 
+/* ================= 프로필 화면 (누가 학습하나요?) ================= */
+const AVATARS = ['🐥','🐶','🐱','🦊','🐰','🐼','🦁','🐸','🐧','🦄','🐯','🐨'];
+let selAv = AVATARS[0];
+function profileMeta(id){
+  try{
+    const b = JSON.parse(localStorage.getItem('vocaQuest.p.' + id + '.best') || '{}');
+    let stars = 0, days = 0;
+    for (const v of Object.values(b)){ stars += v.stars; if (v.stars >= 1) days++; }
+    return days ? 'DAY ' + days + ' 클리어 · ⭐ ' + stars : '새로운 모험가';
+  }catch(e){ return ''; }
+}
+function renderProfiles(){
+  const list = getProfiles();
+  const grid = $('prof-grid');
+  grid.classList.remove('manage');
+  grid.innerHTML = '';
+  for (const p of list){
+    const card = document.createElement('button');
+    card.className = 'prof-card';
+    card.innerHTML =
+      '<span class="prof-del">✕</span>' +
+      '<div class="prof-face">' + p.av + '</div>' +
+      '<div class="prof-nick">' + escapeHtml(p.nick) + '</div>' +
+      '<div class="prof-meta">' + profileMeta(p.id) + '</div>';
+    card.onclick = (e)=>{
+      if (e.target.classList.contains('prof-del')){ delProfile(p); return; }
+      sfx.tap(); haptic.tap();
+      selectProfile(p.id, false);
+    };
+    grid.appendChild(card);
+  }
+  const add = document.createElement('button');
+  add.className = 'prof-card add';
+  add.innerHTML = '<div class="prof-face">＋</div><div class="prof-nick">새 프로필</div>';
+  add.onclick = ()=>{ sfx.tap(); showCreate(false); };
+  grid.appendChild(add);
+  if (!list.length){ grid.style.display = 'none'; showCreate(true); }
+  else { grid.style.display = 'flex'; $('prof-create').style.display = 'none'; }
+  renderSyncFooter();
+}
+function showCreate(forced){
+  $('prof-create').style.display = 'block';
+  $('pc-cancel').style.display = forced ? 'none' : 'block';
+  $('pc-title').textContent = forced ? '✨ 첫 프로필 만들기 (닉네임 필수!)' : '✨ 새 프로필 만들기';
+  const box = $('pc-avatars');
+  box.innerHTML = '';
+  AVATARS.forEach(a=>{
+    const b = document.createElement('button');
+    b.className = 'pc-av' + (a === selAv ? ' sel' : '');
+    b.textContent = a;
+    b.onclick = ()=>{ selAv = a; [...box.children].forEach(c=>c.classList.toggle('sel', c === b)); sfx.tap(); };
+    box.appendChild(b);
+  });
+  $('pc-nick').value = '';
+}
+function delProfile(p){
+  if (!confirm('"' + p.nick + '" 프로필과 학습 기록을 삭제할까요?')) return;
+  saveProfiles(getProfiles().filter(x=>x.id !== p.id));
+  ['best','srs','hist','session'].forEach(sfx=>localStorage.removeItem('vocaQuest.p.' + p.id + '.' + sfx));
+  pushRegistry();
+  renderProfiles();
+}
+function selectProfile(id, adopt){
+  PID = id;
+  localStorage.setItem(LS_LAST, id);
+  if (adopt) adoptLegacy();
+  store.load();
+  renderHome();
+  show('screen-home');
+  bgm.start('home');
+  setTimeout(scrollToCurrent, 250);
+  // 클라우드에서 이 프로필 최신 데이터 병합 후 화면 갱신
+  pullProfile().then(()=>{
+    if (PID === id && $('screen-home').classList.contains('active')) renderHome();
+  });
+}
+function openProfileScreen(){
+  renderProfiles();
+  show('screen-profile');
+  bgm.start('home');
+  // 백그라운드로 프로필 목록 최신화
+  pullRegistry().then(r=>{
+    if (r && $('screen-profile').classList.contains('active') && $('prof-create').style.display === 'none') renderProfiles();
+  });
+}
+function renderSyncFooter(){
+  const el = $('prof-sync');
+  if (syncCode){
+    el.innerHTML = '☁️ 기기 연동 켜짐 — 다른 기기에서 코드로 연결하면 <b>같은 프로필</b>을 이어 써요<br>' +
+      '<button class="chip-btn" id="sync-copy">📋 가족 코드 복사</button> ' +
+      '<button class="chip-btn" id="sync-manage">🛠 프로필 관리</button>';
+    $('sync-copy').onclick = async ()=>{
+      try{ await navigator.clipboard.writeText(syncCode); toast('가족 코드 복사 완료! 카톡 등으로 보내주세요 📨'); }
+      catch(e){ prompt('아래 코드를 길게 눌러 복사하세요', syncCode); }
+    };
+  } else {
+    el.innerHTML = '☁️ 다른 기기(동생 폰 등)와 학습 기록을 연동할 수 있어요<br>' +
+      '<button class="chip-btn" id="sync-new">✨ 가족 코드 만들기</button> ' +
+      '<button class="chip-btn" id="sync-join">🔗 가족 코드로 연결</button> ' +
+      '<button class="chip-btn" id="sync-manage">🛠 관리</button>';
+    $('sync-new').onclick = async ()=>{
+      toast('클라우드 만드는 중...');
+      if (await cloudCreate()){ pushRegistry(); if (PID) pushProfile(); renderSyncFooter(); toast('완성! 📋 코드를 복사해 공유하세요'); }
+      else toast('⚠️ 연결 실패 — 인터넷 확인 후 다시 시도해주세요');
+    };
+    $('sync-join').onclick = async ()=>{
+      const code = (prompt('받은 가족 코드를 붙여넣어 주세요') || '').trim();
+      if (!code) return;
+      syncCode = code; localStorage.setItem(LS_SYNC, code); syncState = 'idle';
+      toast('프로필 불러오는 중...');
+      const reg = await pullRegistry();
+      if (reg === undefined){ toast('⚠️ 코드를 확인해주세요'); syncCode = ''; localStorage.removeItem(LS_SYNC); syncState = 'off'; }
+      else toast('연결 완료! 프로필을 선택하세요 🎉');
+      renderProfiles();
+    };
+  }
+  $('sync-manage').onclick = ()=>$('prof-grid').classList.toggle('manage');
+}
+
 /* ================= session persistence (이어하기) ================= */
 function saveSession(nextIdx){
   if (!S) return;
@@ -765,18 +1103,18 @@ function saveSession(nextIdx){
     score:S.score, combo:S.combo, maxCombo:S.maxCombo, correct:S.correct,
     wrongQs:S.wrongQs, sched:S.sched, base:S.base, waveCorrect:S.waveCorrect,
   };
-  try{ localStorage.setItem(LS_SESS, JSON.stringify(snap)); }catch(e){}
+  try{ localStorage.setItem(pk('session'), JSON.stringify(snap)); }catch(e){}
 }
 function loadSession(){
   try{
-    const raw = localStorage.getItem(LS_SESS);
+    const raw = localStorage.getItem(pk('session'));
     if (!raw) return null;
     const s = JSON.parse(raw);
     if (!s || !Array.isArray(s.questions) || s.idx >= s.questions.length) return null;
     return s;
   }catch(e){ return null; }
 }
-function clearSession(){ localStorage.removeItem(LS_SESS); }
+function clearSession(){ localStorage.removeItem(pk('session')); }
 function resumeSession(){
   const s = loadSession();
   if (!s) return false;
@@ -1376,6 +1714,11 @@ function renderHome(){
   const streak = calcStreak();
   $('home-streak').textContent = streak >= 2 ? '🔥 ' + streak + '일 연속 학습 중!' : (streak === 1 ? '🔥 오늘도 학습 완료! 내일도 만나요' : '');
 
+  // 프로필 칩 (탭하면 프로필 전환)
+  const prof = getProfiles().find(p=>p.id === PID);
+  if (prof){ $('mc-face').textContent = prof.av; $('mc-nick').textContent = prof.nick; }
+  renderSyncBits();
+
   const cards = srsCards();
   const masters = cards.filter(c=>c.lv >= MASTER_LV).length;
   const learning = cards.length - masters;
@@ -1866,13 +2209,32 @@ function renderNote(){
 
 /* ================= wiring ================= */
 $('btn-start').onclick = ()=>{
-  // GAME START = 오디오 잠금해제 제스처 → BGM 자동 시작
+  // GAME START = 오디오 잠금해제 제스처 → BGM 자동 시작 → 프로필 선택
   unlockAudio();
   sfx.fanfare(); haptic.combo();
-  renderHome();
-  show('screen-home');
-  bgm.start('home');
-  setTimeout(scrollToCurrent, 200);
+  openProfileScreen();
+};
+$('pc-go').onclick = ()=>{
+  const nick = $('pc-nick').value.trim();
+  if (!nick){ toast('닉네임을 입력해주세요! ✍️'); $('pc-nick').focus(); return; }
+  sfx.tap(); haptic.tap();
+  const list = getProfiles();
+  const p = { id: Math.random().toString(36).slice(2, 8) + Math.random().toString(36).slice(2, 4), nick, av: selAv, ts: Date.now(), created: Date.now() };
+  list.push(p);
+  saveProfiles(list);
+  const isFirst = list.length === 1;
+  (async ()=>{ // 첫 기기라면 가족 클라우드 자동 생성
+    if (!syncCode) await cloudCreate();
+    pushRegistry();
+    if (PID) pushProfile();
+  })();
+  selectProfile(p.id, isFirst); // 첫 프로필은 기존(프로필 이전) 데이터 승계
+};
+$('pc-cancel').onclick = ()=>{ sfx.tap(); renderProfiles(); };
+$('me-chip').onclick = ()=>{
+  sfx.tap(); haptic.tap();
+  if (syncTimer) pushProfile(); // 프로필 화면으로 나가기 전 저장 밀어넣기
+  openProfileScreen();
 };
 $('btn-review').onclick = function(){
   if (this.classList.contains('off')){ sfx.tap(); saySpeechHome(); return; }
@@ -1931,7 +2293,7 @@ addEventListener('keydown', e=>{
   }
 });
 
-renderHome();
+// 부팅은 타이틀 화면 → GAME START → 프로필 선택 → 홈 순서로 진행
 </script>
 </body>
 </html>
