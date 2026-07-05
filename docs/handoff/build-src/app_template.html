@@ -254,11 +254,38 @@ h1 .grad{background:linear-gradient(90deg,var(--purple),var(--pink),var(--orange
 .choice.dim{opacity:.45;}
 @keyframes pick-pop{0%{transform:scale(1)}40%{transform:scale(1.05)}100%{transform:scale(1)}}
 
-/* ---------- RESULT ---------- */
-.result-head{text-align:center;padding-top:40px;}
-#result-emoji{font-size:80px;display:inline-block;animation:bounce 2s ease-in-out infinite;}
-#result-title{font-size:32px;margin-top:8px;}
+/* ---------- RESULT (리듬게임식 리캡) ---------- */
+.result-head{text-align:center;padding-top:26px;}
+.rank-letter{
+  font-size:120px;line-height:1;display:inline-block;letter-spacing:-4px;
+  -webkit-text-stroke:5px var(--line);text-shadow:6px 8px 0 var(--line);
+  opacity:0;transform:scale(3);
+}
+.rank-letter.show{animation:rank-stamp .5s cubic-bezier(.2,1.6,.4,1) forwards;}
+@keyframes rank-stamp{
+  0%{opacity:0;transform:scale(3.4) rotate(14deg)}
+  55%{opacity:1;transform:scale(.88) rotate(-5deg)}
+  100%{opacity:1;transform:scale(1) rotate(-4deg)}
+}
+.rank-letter.r-S{color:#FFD43B;text-shadow:6px 8px 0 var(--line), 0 0 55px #FFB800;animation:rank-stamp .5s cubic-bezier(.2,1.6,.4,1) forwards, cb-rainbow 1.6s linear .5s infinite;}
+.rank-letter.r-A{color:#FF6FA5;text-shadow:6px 8px 0 var(--line), 0 0 40px #FF6FA5AA;}
+.rank-letter.r-B{color:#4DA3FF;}
+.rank-letter.r-C{color:#3ECF8E;}
+.rank-letter.r-D{color:#B9B0CE;}
+#result-title{font-size:28px;margin-top:4px;}
 #result-msg{font-size:15px;font-weight:400;color:#6B6288;margin-top:6px;}
+.acc-bar{
+  position:relative;height:26px;background:#fff;border:3px solid var(--line);border-radius:999px;
+  overflow:hidden;margin:14px 6px 0;
+}
+.acc-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--green),var(--yellow),var(--orange));border-radius:999px;transition:width .8s cubic-bezier(.2,1,.4,1);}
+.acc-txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--ink);}
+.record-badge{
+  display:inline-block;margin-top:12px;background:linear-gradient(100deg,#FFD43B,#FF9A3C);
+  border:3px solid var(--line);border-radius:999px;box-shadow:var(--hard);padding:7px 18px;font-size:16px;
+  opacity:0;transform:scale(0);
+}
+.record-badge.show{animation:cb-punch .55s cubic-bezier(.2,1.9,.4,1) forwards;}
 .result-stars{font-size:44px;letter-spacing:6px;margin-top:10px;color:#E4DEF2;}
 .result-stars .on{color:#FFB800;display:inline-block;animation:star-in .5s cubic-bezier(.2,1.8,.4,1) backwards;}
 .result-stars .on:nth-child(2){animation-delay:.15s}
@@ -407,7 +434,7 @@ h1 .grad{background:linear-gradient(90deg,var(--purple),var(--pink),var(--orange
         <button class="srs-btn note" id="btn-note">📒 복습 노트</button>
       </div>
     </div>
-    <div class="day-title">🗓️ DAY를 골라 시작! <button class="chip-btn" id="btn-hist">📊 학습 기록</button></div>
+    <div class="day-title">🗓️ DAY를 골라 시작! <button class="chip-btn" id="btn-bgm-home">🎵 음악</button><button class="chip-btn" id="btn-hist" style="margin-left:8px">📊 기록</button></div>
     <div class="day-grid" id="day-grid"></div>
   </section>
 
@@ -419,6 +446,7 @@ h1 .grad{background:linear-gradient(90deg,var(--purple),var(--pink),var(--orange
         <div class="progress-info"><span id="p-count">1 / 50</span><span class="pi-right" id="p-day">DAY 1</span></div>
         <div class="pbar"><div class="fill" id="p-fill"></div></div>
       </div>
+      <button class="icon-btn" id="btn-bgm" aria-label="배경음악 켜기/끄기">🎵</button>
       <button class="icon-btn" id="btn-sound" aria-label="소리 켜기/끄기">🔊</button>
     </div>
     <div class="hud">
@@ -438,10 +466,12 @@ h1 .grad{background:linear-gradient(90deg,var(--purple),var(--pink),var(--orange
   <!-- RESULT -->
   <section class="screen" id="screen-result">
     <div class="result-head">
-      <span id="result-emoji">🏆</span>
+      <div><span class="rank-letter" id="rank-letter">S</span></div>
       <div id="result-title">완벽해요!</div>
       <div id="result-msg"></div>
+      <div class="acc-bar"><div class="acc-fill" id="acc-fill"></div><span class="acc-txt" id="acc-txt">0%</span></div>
       <div class="result-stars" id="result-stars"></div>
+      <div class="record-badge" id="record-badge">🏆 신기록!</div>
     </div>
     <div class="result-stats">
       <div class="stat"><div class="num" id="r-correct">0</div><div class="lbl">맞힌 문제</div></div>
@@ -515,6 +545,7 @@ const LS_WRONG_OLD = 'vocaQuest.wrong';
 const LS_MUTE = 'vocaQuest.mute';
 const LS_SESS = 'vocaQuest.session'; // 진행 중 세션 (이어하기)
 const LS_HIST = 'vocaQuest.hist';    // 완료한 세션 기록
+const LS_BGM = 'vocaQuest.bgm';      // 배경음악 on/off
 
 const DAY_MS = 86400000;
 const SRS_IV = [1, 3, 7, 14, 30];              // 레벨별 다음 복습까지 일수 (망각곡선)
@@ -598,6 +629,7 @@ function resumeSession(){
   } else cc.className = 'combo-chip';
   setMascot('🐥','');
   show('screen-quiz');
+  bgm.start('quiz');
   renderQuestion();
   saySpeech('이어서 가볼까요? 💪', '#6D4FE0');
   return true;
@@ -725,6 +757,8 @@ function unlockAudio(){
       s.buffer = b; s.connect(actx.destination); s.start(0);
       audioUnlocked = true;
     }
+    // 첫 제스처에서 배경음악 시작
+    if (!bgm.started && actx.state === 'running'){ bgm.started = true; bgm.refresh(); }
   }catch(e){}
 }
 // iOS는 touchend/click 시점에만 오디오 잠금이 풀리므로 여러 제스처에 걸어둔다
@@ -776,7 +810,102 @@ const sfx = {
   tap(){ beep(520,.06,'sine',0,.1); },
   fanfare(){ [523,659,784,1046].forEach((f,i)=>beep(f,.22,'triangle',i*.12,.24)); },
   levelup(){ beep(659,.1,'triangle',0,.22); beep(880,.1,'triangle',.09,.24); beep(1319,.26,'triangle',.18,.26); },
+  rankStamp(rank){ // 랭크 도장: 쿵! + 랭크별 여운
+    beep(150,.16,'square',0,.26); beep(75,.3,'sine',.02,.3);
+    if (rank === 'S'){ [1046,1319,1568,2093].forEach((f,i)=>beep(f,.18,'triangle',.2+i*.09,.24)); beep(3136,.3,'sine',.55,.1); }
+    else if (rank === 'A'){ [784,1046,1319].forEach((f,i)=>beep(f,.16,'triangle',.2+i*.09,.22)); }
+    else if (rank === 'B' || rank === 'C'){ beep(659,.14,'triangle',.2,.2); beep(880,.22,'triangle',.32,.2); }
+    else { beep(330,.3,'triangle',.2,.16); }
+  },
 };
+
+/* ================= BGM (WebAudio 실시간 생성 루프) ================= */
+let bgmOn = localStorage.getItem(LS_BGM) !== '0';
+// 코드 진행: C - G - Am - F (낮은 옥타브 주파수)
+const BGM_CHORDS = [
+  [130.81, 164.81, 196.00],
+  [98.00, 123.47, 146.83],
+  [110.00, 130.81, 164.81],
+  [87.31, 110.00, 130.81],
+];
+const bgm = {
+  mode: 'home', master: null, timer: null, next: 0, step: 0, noiseBuf: null, started: false,
+  ensure(){
+    if (!actx) return false;
+    if (!this.master){
+      this.master = actx.createGain();
+      this.master.gain.value = 1;
+      this.master.connect(actx.destination);
+      const len = actx.sampleRate * .1, buf = actx.createBuffer(1, len, actx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i=0;i<len;i++) d[i] = Math.random()*2-1;
+      this.noiseBuf = buf;
+    }
+    return true;
+  },
+  note(f, t, d, type, v){
+    try{
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type; o.frequency.value = f;
+      g.gain.setValueAtTime(v, t);
+      g.gain.exponentialRampToValueAtTime(0.0008, t+d);
+      o.connect(g); g.connect(this.master);
+      o.start(t); o.stop(t+d);
+    }catch(e){}
+  },
+  hat(t, v){
+    try{
+      const s = actx.createBufferSource(), g = actx.createGain();
+      s.buffer = this.noiseBuf;
+      g.gain.setValueAtTime(v, t);
+      g.gain.exponentialRampToValueAtTime(0.0008, t+.045);
+      s.connect(g); g.connect(this.master);
+      s.start(t); s.stop(t+.05);
+    }catch(e){}
+  },
+  start(mode){
+    this.mode = mode;
+    this.stop();
+    if (!bgmOn || muted || !actx || actx.state !== 'running' || !this.ensure()) return;
+    this.step = 0;
+    this.next = actx.currentTime + .06;
+    this.timer = setInterval(()=>this.tick(), 140);
+  },
+  stop(){ if (this.timer){ clearInterval(this.timer); this.timer = null; } },
+  tick(){
+    if (!actx || actx.state !== 'running'){ return; }
+    const quiz = this.mode === 'quiz';
+    const stepDur = quiz ? 60/126/2 : 60/72;      // 퀴즈: 8분음표 126bpm / 홈: 4분음표 72bpm
+    const stepsPerBar = quiz ? 8 : 4;
+    while (this.next < actx.currentTime + .4){
+      const bar = Math.floor(this.step / stepsPerBar) % 4;
+      const s = this.step % stepsPerBar;
+      const ch = BGM_CHORDS[bar];
+      if (quiz){
+        if (s === 0 || s === 4) this.note(ch[0]/2, this.next, .22, 'triangle', .1);   // 베이스
+        const arp = [0,2,1,2,0,2,1,2][s];
+        this.note(ch[arp]*2, this.next, .16, 'square', .022);                          // 아르페지오
+        if (s % 2 === 1) this.hat(this.next, .015);                                    // 햇
+      } else {
+        if (s === 0) ch.forEach(f=>this.note(f, this.next, 2.0, 'triangle', .028));    // 잔잔한 패드
+        if (s === 2) this.note(ch[(Math.floor(this.step/stepsPerBar))%3]*4, this.next, .8, 'sine', .014); // 반짝임
+      }
+      this.next += stepDur;
+      this.step = (this.step + 1) % (stepsPerBar * 4);
+    }
+  },
+  duck(on){ // TTS 동안 볼륨 낮추기
+    try{
+      if (!this.master || !actx) return;
+      this.master.gain.cancelScheduledValues(actx.currentTime);
+      this.master.gain.linearRampToValueAtTime(on ? .22 : 1, actx.currentTime + .18);
+    }catch(e){}
+  },
+  refresh(){ // 설정 변경/화면 전환 후 현재 모드로 재시작
+    if (bgmOn && !muted) this.start(this.mode); else this.stop();
+  },
+};
+document.addEventListener('visibilitychange', ()=>{ if (document.hidden) bgm.stop(); else bgm.refresh(); });
 
 /* ================= TTS ================= */
 function speak(text, lang, rate, onend){
@@ -784,13 +913,13 @@ function speak(text, lang, rate, onend){
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = lang || 'en-US'; u.rate = rate || .92;
-    if (onend){
-      let done = false;
-      const fin = ()=>{ if (!done){ done = true; onend(); } };
-      u.onend = fin; u.onerror = fin;
-    }
+    bgm.duck(true); // 말하는 동안 배경음악 볼륨 낮춤
+    let done = false;
+    const fin = ()=>{ if (!done){ done = true; bgm.duck(false); if (onend) onend(); } };
+    u.onend = fin; u.onerror = fin;
+    setTimeout(()=>{ if (!done) bgm.duck(false); }, 8000);
     speechSynthesis.speak(u);
-  }catch(e){ if (onend) onend(); }
+  }catch(e){ bgm.duck(false); if (onend) onend(); }
 }
 function speakWord(w){
   speak(w.replace(/\[.*?\]/g,' ').replace(/\(.*?\)/g,' '), 'en-US', .92);
@@ -1021,6 +1150,7 @@ function startSession(cfg){
   $('combo-chip').classList.remove('on');
   setMascot('🐥','');
   show('screen-quiz');
+  bgm.start('quiz');
   renderQuestion();
 }
 function setMascot(emoji, anim){
@@ -1200,30 +1330,77 @@ function next(){
 }
 
 /* ================= result ================= */
+// 숫자 카운트업 연출
+function countUp(el, to, dur, fmt){
+  const t0 = performance.now();
+  const step = (t)=>{
+    const p = Math.min(1, (t - t0) / dur);
+    const eased = .5 - Math.cos(Math.PI * p) / 2;
+    el.textContent = fmt(Math.round(to * eased));
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
 function finish(){
   clearSession(); // 세션 완료 → 이어하기 기록 제거
   const total = S.questions.filter(q=>!q.re).length; // 재출제 제외, 첫 시도 기준
   const pct = Math.round(S.correct / total * 100);
   const stars = pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 50 ? 1 : 0;
+  const rank = pct === 100 ? 'S' : pct >= 90 ? 'A' : pct >= 70 ? 'B' : pct >= 50 ? 'C' : 'D';
   logHistory({ t:Date.now(), type:S.type, day:S.day, label:S.label, total, correct:S.correct, pct, score:S.score, maxCombo:S.maxCombo });
+  let newRecord = false;
   if (S.type === 'day'){
     const prev = store.best[S.day];
     if (!prev || pct > prev.pct || (pct === prev.pct && S.score > prev.score)){
+      newRecord = !!prev; // 첫 플레이는 신기록 배지 생략
       store.best[S.day] = { stars, pct, score:S.score };
       store.saveBest();
     }
   }
-  const em = pct===100 ? '🏆' : pct>=90 ? '🥇' : pct>=70 ? '🎉' : pct>=50 ? '💪' : '🌱';
-  const title = pct===100 ? '완벽 그 자체!' : pct>=90 ? '거의 다 왔어요!' : pct>=70 ? '잘했어요!' : pct>=50 ? '좋은 출발!' : '다시 도전!';
-  $('result-emoji').textContent = em;
+  const title = pct===100 ? '완벽 그 자체! 🏆' : pct>=90 ? '거의 다 왔어요! 🥇' : pct>=70 ? '잘했어요! 🎉' : pct>=50 ? '좋은 출발! 💪' : '다시 도전! 🌱';
   $('result-title').textContent = title;
-  $('result-msg').textContent = total + '문제 중 ' + S.correct + '개 정답 · 정답률 ' + pct + '%';
+  $('result-msg').textContent = total + '문제 중 ' + S.correct + '개 정답' + (S.maxCombo >= 3 ? ' · 최고 ' + S.maxCombo + '콤보' : '');
   $('result-stars').innerHTML = S.type === 'day'
     ? [1,2,3].map(i=>'<span class="'+(i<=stars?'on':'')+'">★</span>').join('')
     : '';
-  $('r-correct').textContent = S.correct + ' / ' + total;
-  $('r-score').textContent = '💎 ' + S.score;
-  $('r-combo').textContent = '🔥 ' + S.maxCombo;
+  // 리듬게임식 리캡: 스탯 카운트업 → 게이지 → 랭크 도장
+  const rl = $('rank-letter');
+  rl.className = 'rank-letter';
+  rl.textContent = rank;
+  $('record-badge').className = 'record-badge';
+  $('acc-fill').style.transition = 'none';
+  $('acc-fill').style.width = '0%';
+  countUp($('r-correct'), S.correct, 750, v=>v + ' / ' + total);
+  countUp($('r-score'), S.score, 750, v=>'💎 ' + v);
+  countUp($('r-combo'), S.maxCombo, 750, v=>'🔥 ' + v);
+  countUp($('acc-txt'), pct, 850, v=>'정답률 ' + v + '%');
+  setTimeout(()=>{
+    $('acc-fill').style.transition = '';
+    $('acc-fill').style.width = pct + '%';
+  }, 60);
+  const sess = S;
+  setTimeout(()=>{
+    if (S !== sess || !$('screen-result').classList.contains('active')) return;
+    rl.className = 'rank-letter show r-' + rank;
+    sfx.rankStamp(rank);
+    haptic.correct();
+    if (rank === 'S' || rank === 'A'){
+      const app = $('app');
+      app.classList.remove('shake1','shake2'); void app.offsetWidth;
+      app.classList.add(rank === 'S' ? 'shake2' : 'shake1');
+      setTimeout(()=>app.classList.remove('shake1','shake2'), 700);
+      burst(innerWidth*.3, innerHeight*.22, rank === 'S' ? 70 : 45);
+      setTimeout(()=>burst(innerWidth*.7, innerHeight*.28, rank === 'S' ? 70 : 45), 150);
+      if (rank === 'S') setTimeout(()=>burst(innerWidth*.5, innerHeight*.4, 80), 300);
+    }
+    if (newRecord){
+      setTimeout(()=>{
+        $('record-badge').className = 'record-badge show';
+        sfx.levelup(); haptic.combo();
+      }, 450);
+    }
+  }, 1000);
 
   // 복습 일정 요약 (레벨업/마스터/리셋)
   const sb = $('sched-box'), sl = $('sched-list');
@@ -1264,10 +1441,7 @@ function finish(){
   }
 
   show('screen-result');
-  if ((S.type === 'day' && stars >= 2) || (S.type === 'review' && pct >= 90)){
-    sfx.fanfare(); haptic.fanfare();
-    setTimeout(()=>{ burst(innerWidth*.3, innerHeight*.25, 50); burst(innerWidth*.7, innerHeight*.3, 50); }, 200);
-  }
+  bgm.start('home'); // 결과 화면은 잔잔한 음악으로
 }
 
 /* ================= note (복습 노트) ================= */
@@ -1321,8 +1495,23 @@ $('btn-hist-back').onclick = ()=>{ sfx.tap(); renderHome(); show('screen-home');
 $('btn-resume').onclick = ()=>{ sfx.tap(); haptic.tap(); resumeSession(); };
 $('btn-resume-x').onclick = (e)=>{ e.stopPropagation(); sfx.tap(); clearSession(); renderHome(); };
 $('btn-note-back').onclick = ()=>{ sfx.tap(); renderHome(); show('screen-home'); };
-$('btn-quit').onclick = ()=>{ sfx.tap(); try{ speechSynthesis.cancel(); }catch(e){} closeSheet(); S = null; renderHome(); show('screen-home'); };
-$('btn-home').onclick = ()=>{ sfx.tap(); renderHome(); show('screen-home'); };
+$('btn-quit').onclick = ()=>{ sfx.tap(); try{ speechSynthesis.cancel(); }catch(e){} closeSheet(); S = null; renderHome(); show('screen-home'); bgm.start('home'); };
+$('btn-home').onclick = ()=>{ sfx.tap(); renderHome(); show('screen-home'); bgm.start('home'); };
+function syncBgmButtons(){
+  $('btn-bgm').style.opacity = bgmOn ? '1' : '.4';
+  $('btn-bgm-home').textContent = bgmOn ? '🎵 음악 켬' : '🎵 음악 끔';
+  $('btn-bgm-home').style.opacity = bgmOn ? '1' : '.55';
+}
+function toggleBgm(){
+  bgmOn = !bgmOn;
+  localStorage.setItem(LS_BGM, bgmOn ? '1' : '0');
+  syncBgmButtons();
+  bgm.refresh();
+  sfx.tap();
+}
+$('btn-bgm').onclick = toggleBgm;
+$('btn-bgm-home').onclick = toggleBgm;
+syncBgmButtons();
 $('btn-retry').onclick = ()=>{
   sfx.tap(); haptic.tap();
   if (S.type === 'day') startDay(S.day); else startReview();
@@ -1338,6 +1527,7 @@ $('btn-sound').onclick = function(){
   muted = !muted;
   localStorage.setItem(LS_MUTE, muted ? '1' : '0');
   this.textContent = muted ? '🔇' : '🔊';
+  bgm.refresh(); // 음소거는 배경음악도 함께 제어
   if (!muted) sfx.tap();
 };
 $('btn-sound').textContent = muted ? '🔇' : '🔊';
