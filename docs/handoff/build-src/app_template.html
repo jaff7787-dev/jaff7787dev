@@ -875,6 +875,39 @@ const haptic = {
 
 /* ================= sound (WebAudio) ================= */
 let actx = null, audioUnlocked = false;
+
+/* iOS 무음 스위치 우회: 무음 <audio>를 루프 재생하면 오디오 세션이 '미디어 재생'으로
+   분류되어, 무음 모드에서도 웹오디오(BGM·효과음)가 스피커로 출력됨 (unmute.js 기법) */
+const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+let silentEl = null;
+function makeSilentWav(){ // 1초짜리 무음 WAV를 즉석 생성
+  const rate = 8000, n = rate;
+  const buf = new ArrayBuffer(44 + n), v = new DataView(buf);
+  const ws = (o,s)=>{ for (let i=0;i<s.length;i++) v.setUint8(o+i, s.charCodeAt(i)); };
+  ws(0,'RIFF'); v.setUint32(4, 36+n, true); ws(8,'WAVE'); ws(12,'fmt ');
+  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,rate,true); v.setUint32(28,rate,true); v.setUint16(32,1,true); v.setUint16(34,8,true);
+  ws(36,'data'); v.setUint32(40,n,true);
+  for (let i=0;i<n;i++) v.setUint8(44+i, 128); // 8비트 무음
+  return URL.createObjectURL(new Blob([buf], { type:'audio/wav' }));
+}
+function keepAudioSessionAlive(){
+  if (!IS_IOS || muted) return;
+  try{
+    if (!silentEl){
+      silentEl = new Audio(makeSilentWav());
+      silentEl.loop = true;
+      silentEl.setAttribute('playsinline','');
+      silentEl.volume = 0.01;
+    }
+    if (silentEl.paused) silentEl.play().catch(()=>{});
+  }catch(e){}
+}
+function releaseAudioSession(){ // 앱 음소거 시 다른 앱 음악을 막지 않도록 해제
+  try{ if (silentEl && !silentEl.paused) silentEl.pause(); }catch(e){}
+}
+document.addEventListener('visibilitychange', ()=>{ if (!document.hidden) keepAudioSessionAlive(); });
 function unlockAudio(){
   try{
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -892,6 +925,7 @@ function unlockAudio(){
       s.buffer = b; s.connect(actx.destination); s.start(0);
       audioUnlocked = true;
     }
+    keepAudioSessionAlive(); // iOS 무음 스위치 우회 (제스처 안에서 시작해야 함)
     // 첫 제스처에서 배경음악 시작
     if (!bgm.started && actx.state === 'running'){ bgm.started = true; bgm.refresh(); }
   }catch(e){}
@@ -1826,7 +1860,8 @@ $('btn-sound').onclick = function(){
   localStorage.setItem(LS_MUTE, muted ? '1' : '0');
   this.textContent = muted ? '🔇' : '🔊';
   bgm.refresh(); // 음소거는 배경음악도 함께 제어
-  if (!muted) sfx.tap();
+  if (muted) releaseAudioSession(); // 무음 시 오디오 세션 해제 (다른 앱 음악 재생 가능)
+  else { keepAudioSessionAlive(); sfx.tap(); }
 };
 $('btn-sound').textContent = muted ? '🔇' : '🔊';
 addEventListener('keydown', e=>{
