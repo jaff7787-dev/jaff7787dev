@@ -5,6 +5,32 @@ SP = '/tmp/claude-0/-home-user-jaff7787dev/5afc4c96-5917-56fb-8d14-3316acbf7ce4/
 REPO = '/home/user/jaff7787dev'
 
 vocab = json.load(open(f'{SP}/vocab.json'))
+
+# ---- 핵심 뜻(s) 전처리: 퀴즈 선택지·TTS용 짧은 뜻 ----
+import re as _re
+_POS_SPLIT = _re.compile(r'\s(?=(?:a|v|n|ad|adv|prep|conj|pron|int)\.\s)')
+_POS_HEAD = _re.compile(r'^((?:a|v|n|ad|adv|prep|conj|pron|int)\.)\s*')
+def core_meaning(m):
+    s = _POS_SPLIT.split(m)[0]              # 첫 품사 블록만
+    s = s.split(';')[0]                     # 첫 의미군만
+    s = _re.sub(r'\[[^\]]*\]', '', s)    # [대체어] 제거
+    s = _re.sub(r'\([^)]*\)', ' ', s)     # (보충설명) 제거
+    s = _re.sub(r'\s+', ' ', s).strip().strip(',').strip()
+    mm = _POS_HEAD.match(s)
+    pos, body = ('', s) if not mm else (mm.group(1) + ' ', s[mm.end():])
+    parts = [p.strip() for p in body.split(',') if p.strip()]
+    body2 = ', '.join(parts[:2])            # 동의어는 앞 2개까지
+    if len(pos + body2) > 24 and len(parts) > 1:
+        body2 = parts[0]
+    out = (pos + body2).strip()
+    return out if out else m
+
+for day in vocab:
+    for e in day:
+        s = core_meaning(e['m'])
+        if s != e['m']:
+            e['s'] = s
+
 vocab_js = 'const VOCAB=' + json.dumps(vocab, ensure_ascii=False, separators=(',', ':')) + ';'
 
 tpl = open(f'{SP}/app_template.html').read()
@@ -34,7 +60,8 @@ def subset_font(path):
 reg = subset_font(f'{REPO}/Pretendard-Regular.otf')
 xb = subset_font(f'{REPO}/Pretendard-ExtraBold.otf')
 
-html = tpl.replace('__FONT_REGULAR__', reg).replace('__FONT_XBOLD__', xb)
+runner_b64 = base64.b64encode(open(f'{SP}/runner_sheet.png','rb').read()).decode()
+html = tpl.replace('__FONT_REGULAR__', reg).replace('__FONT_XBOLD__', xb).replace('__RUNNER__', runner_b64)
 
 # repo version: external vocab.js
 open(f'{REPO}/vocab.js', 'w').write(vocab_js)
