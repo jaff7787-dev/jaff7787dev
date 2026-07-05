@@ -975,13 +975,6 @@ const bgm = {
       this.step = (this.step + 1) % (stepsPerBar * 4);
     }
   },
-  duck(on){ // TTS 동안 볼륨 낮추기
-    try{
-      if (!this.master || !actx) return;
-      this.master.gain.cancelScheduledValues(actx.currentTime);
-      this.master.gain.linearRampToValueAtTime(on ? .22 : 1, actx.currentTime + .18);
-    }catch(e){}
-  },
   refresh(){ // 설정 변경/화면 전환 후 현재 모드로 재시작
     if (bgmOn && !muted) this.start(this.mode); else this.stop();
   },
@@ -995,13 +988,11 @@ function speak(text, lang, rate, onend){
     const u = new SpeechSynthesisUtterance(text);
     u.lang = lang || 'en-US'; u.rate = rate || .92;
     u.volume = .55; // 효과음보다 도드라지지 않게 음성은 낮춤
-    bgm.duck(true); // 말하는 동안 배경음악 볼륨 낮춤
     let done = false;
-    const fin = ()=>{ if (!done){ done = true; bgm.duck(false); if (onend) onend(); } };
+    const fin = ()=>{ if (!done){ done = true; if (onend) onend(); } };
     u.onend = fin; u.onerror = fin;
-    setTimeout(()=>{ if (!done) bgm.duck(false); }, 8000);
     speechSynthesis.speak(u);
-  }catch(e){ bgm.duck(false); if (onend) onend(); }
+  }catch(e){ if (onend) onend(); }
 }
 function speakWord(w){
   speak(w.replace(/\[.*?\]/g,' ').replace(/\(.*?\)/g,' '), 'en-US', .92);
